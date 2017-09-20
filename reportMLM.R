@@ -13,7 +13,7 @@ reportMLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', par
     estimates$es.r <-  sqrt((estimates$statistic ^ 2 / (estimates$statistic ^ 2 + estimates$df))) # r
     estimates$es.d <-  (2 * estimates$statistic) / sqrt(estimates$df) # d
     
-    # if partR2 == TRUE, compute partial R square
+    # if partR2 == TRUE, compute partial R square (DOESN'T WORK IF MODEL HAS CATEGORICAL VARAIBLES WITH > 2 LEVELS!)
     if (partR2) {
         # effect size semi partial R (Edwards et al., 2008)
         anovaModel <- anova(model)
@@ -21,7 +21,7 @@ reportMLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', par
         numDF <- anovaModel$NumDF #numerator DFs
         denDF <- anovaModel$DenDF #denominator DFs
         semiPartialREffect <- (numDF / denDF * Fs) / (1 + (numDF / denDF * Fs)) # effect sizes
-        estimates$es.partR2 <- c(NA, semiPartialREffect)   
+        estimates$es.partR2 <- c(NA, semiPartialREffect)
     }
     
     # print formatted results
@@ -38,9 +38,14 @@ reportMLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', par
         estimateV <- ifelse(abs(estimateV) < 0.01, round(estimateV, 3), round(estimateV, 2))
         estimateSign <- sign(estimateV) # sign (negative or positive)
         estimateV <- ifelse(abs(estimateV) < 0.01, 
-                             sprintf('%.3f', abs(estimateV)), 
-                             sprintf('%.2f', abs(estimateV))) # character (absolute value)
-        estimateV <- ifelse(estimateSign == -1, paste0("–", estimateV), estimateV) # if negative, add minus sign to character vector
+                            sprintf('%.3f', abs(estimateV)), 
+                            sprintf('%.2f', abs(estimateV))) # character (absolute value)
+        
+        if (.Platform$OS.type == 'unix') { # if linux/mac, ensure negative signs are dashes, not hyphens
+            estimateV <- ifelse(estimateSign == -1, paste0("–", estimateV), estimateV) # if negative, add dash sign to character vector    
+        } else {
+            estimateV <- ifelse(estimateSign == -1, paste0("-", estimateV), estimateV) # hyphen
+        }
         
         seV <- estimates[i, 'se']
         seV <- ifelse(abs(seV) < 0.01, round(seV, 3), round(seV, 2))
@@ -49,11 +54,17 @@ reportMLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', par
                       sprintf('%.2f', abs(seV))) # character
         dfV <- round(estimates[i, 'df'])
         statisticV <- estimates[i, 'statistic']
+        
         statisticSign <- sign(statisticV)
         statisticV <- ifelse(abs(statisticV) < 0.01, 
                              sprintf('%.3f', abs(statisticV)), 
                              sprintf('%.2f', abs(statisticV))) # character
-        statisticV <- ifelse(statisticSign == -1, paste0("–", statisticV), statisticV) # character
+        
+        if (.Platform$OS.type == 'unix') { # if linux/mac, ensure negative signs are dashes, not hyphens
+            statisticV <- ifelse(statisticSign == -1, paste0("–", statisticV), statisticV) # dash
+        } else {
+            statisticV <- ifelse(statisticSign == -1, paste0("-", statisticV), statisticV) # hyphen
+        }
         
         pV <- estimates[i, 'p']
         rV <- estimates[i, 'es.r']
@@ -95,3 +106,14 @@ reportMLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', par
     
     return(round(estimates, decimal))
 }
+
+
+#### test function #####
+# library(lme4); library(lmerTest)
+# model1 <- lmer(weight ~ Time  + (1 + Time | Chick), data = ChickWeight)
+# model2 <- lmer(-weight ~ Time  + (1 + Time | Chick), data = ChickWeight)
+# summary(model1)
+# reportMLM(model1)
+
+# summary(model2)
+# reportMLM(model2)

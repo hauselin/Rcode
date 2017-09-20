@@ -34,7 +34,11 @@ reportLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', show
         estimateV <- ifelse(abs(estimateV) < 0.01, 
                             sprintf('%.3f', abs(estimateV)), 
                             sprintf('%.2f', abs(estimateV))) # character (absolute value)
-        estimateV <- ifelse(estimateSign == -1, paste0("–", estimateV), estimateV) # if negative, add minus sign to character vector
+        if (.Platform$OS.type == 'unix') { # if linux/mac, ensure negative signs are dashes, not hyphens
+            estimateV <- ifelse(estimateSign == -1, paste0("–", estimateV), estimateV) # if negative, add minus sign to character vector
+        } else {
+            estimateV <- ifelse(estimateSign == -1, paste0("-", estimateV), estimateV) # if negative, add minus sign to character vector
+        }
         
         seV <- estimates[i, 'se']
         seV <- ifelse(abs(seV) < 0.01, round(seV, 3), round(seV, 2))
@@ -47,7 +51,11 @@ reportLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', show
         statisticV <- ifelse(abs(statisticV) < 0.01, 
                              sprintf('%.3f', abs(statisticV)), 
                              sprintf('%.2f', abs(statisticV))) # character
-        statisticV <- ifelse(statisticSign == -1, paste0("–", statisticV), statisticV) # character
+        if (.Platform$OS.type == 'unix') { # if linux/mac, ensure negative signs are dashes, not hyphens
+            statisticV <- ifelse(statisticSign == -1, paste0("–", statisticV), statisticV) # character
+        } else {
+            statisticV <- ifelse(statisticSign == -1, paste0("-", statisticV), statisticV) # character
+        }
         
         pV <- estimates[i, 'p']
         rV <- estimates[i, 'es.r']
@@ -92,3 +100,12 @@ reportLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', show
     }
     
 }
+
+#### test function #####
+# model1 <- lm(weight ~ Time, data = ChickWeight)
+# model2 <- lm(-weight ~ Time, data = ChickWeight)
+# summary(model1)
+# reportLM(model1)
+
+# summary(model2)
+# reportLM(model2)

@@ -32,7 +32,6 @@ outliersZ <- function(x, zCutOff = 1.96, replaceOutliersWith = NA, outlierIndice
     }
 }
 
-
 #### median absolute deviation outlier detection ####
 outliersMAD <- function(x, MADCutOff = 2.5, replaceOutliersWith = NA, showMADValues = FALSE, outlierIndices = FALSE, bConstant = 1.4826, digits = 2) {
     # clean and identify outliers using MAD cut-off method (see Leys et al., 2013)
