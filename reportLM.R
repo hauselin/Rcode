@@ -35,9 +35,9 @@ reportLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', show
                             sprintf('%.3f', abs(estimateV)), 
                             sprintf('%.2f', abs(estimateV))) # character (absolute value)
         if (.Platform$OS.type == 'unix') { # if linux/mac, ensure negative signs are dashes, not hyphens
-            estimateV <- ifelse(estimateSign == -1, paste0("–", estimateV), estimateV) # if negative, add minus sign to character vector
+            estimateV <- ifelse(estimateSign == -1, paste0("–", estimateV), estimateV) # dash
         } else {
-            estimateV <- ifelse(estimateSign == -1, paste0("-", estimateV), estimateV) # if negative, add minus sign to character vector
+            estimateV <- ifelse(estimateSign == -1, paste0("-", estimateV), estimateV) # hyphen
         }
         
         seV <- estimates[i, 'se']
@@ -52,9 +52,9 @@ reportLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', show
                              sprintf('%.3f', abs(statisticV)), 
                              sprintf('%.2f', abs(statisticV))) # character
         if (.Platform$OS.type == 'unix') { # if linux/mac, ensure negative signs are dashes, not hyphens
-            statisticV <- ifelse(statisticSign == -1, paste0("–", statisticV), statisticV) # character
+            statisticV <- ifelse(statisticSign == -1, paste0("–", statisticV), statisticV) # dash
         } else {
-            statisticV <- ifelse(statisticSign == -1, paste0("-", statisticV), statisticV) # character
+            statisticV <- ifelse(statisticSign == -1, paste0("-", statisticV), statisticV) # hyphen
         }
         
         pV <- estimates[i, 'p']
