@@ -1,8 +1,8 @@
-reportMLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', partR2 = FALSE) {
-    
+reportMLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', partR2 = FALSE, showTable = TRUE) {
+    # Last modified by Hause Lin 31-10-17 20:06
     # APA format
     message("Fixed effects for MLM with effect sizes r, d, and semi-partial R (only works with lme and lmer fitted models)")
-    cat("r: .10 (small), .30 (medium), .50 (large) (Cohen, 1992)\nd: 0.20 (small), 0.50 (medium), .80 (large) (Cohen, 1992)\nR2: .02 (small), .13 (medium), .26 (large) (Cohen, 1992)")
+    cat("r: .10 (small), .30 (medium), .50 (large) (Cohen, 1992)\nd: 0.20 (small), 0.50 (medium), .80 (large) (Cohen, 1992)\nR2: .02 (small), .13 (medium), .26 (large) (Cohen, 1992)\n")
     
     estimates <- data.frame(coef(summary(model)))
     effectNames <- rownames(estimates)
@@ -41,8 +41,8 @@ reportMLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', par
                             sprintf('%.3f', abs(estimateV)), 
                             sprintf('%.2f', abs(estimateV))) # character (absolute value)
         
-        if (.Platform$OS.type == 'unix') { # if linux/mac, ensure negative signs are dashes, not hyphens
-            estimateV <- ifelse(estimateSign == -1, paste0("–", estimateV), estimateV) # if negative, add dash sign to character vector    
+        if (.Platform$OS.type == 'unix') { # if linux/mac, ensure negative sign is minus, not hyphens
+            estimateV <- ifelse(estimateSign == -1, paste0("−", estimateV), estimateV) # if negative, add minus sign to character vector    
         } else {
             estimateV <- ifelse(estimateSign == -1, paste0("-", estimateV), estimateV) # hyphen
         }
@@ -60,8 +60,8 @@ reportMLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', par
                              sprintf('%.3f', abs(statisticV)), 
                              sprintf('%.2f', abs(statisticV))) # character
         
-        if (.Platform$OS.type == 'unix') { # if linux/mac, ensure negative signs are dashes, not hyphens
-            statisticV <- ifelse(statisticSign == -1, paste0("–", statisticV), statisticV) # dash
+        if (.Platform$OS.type == 'unix') { # if linux/mac, ensure negative signs is minus, not hyphens
+            statisticV <- ifelse(statisticSign == -1, paste0("−", statisticV), statisticV) # minus
         } else {
             statisticV <- ifelse(statisticSign == -1, paste0("-", statisticV), statisticV) # hyphen
         }
@@ -104,7 +104,9 @@ reportMLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', par
     
     rownames(estimates) <- paste(1:nrow(estimates), rownames(estimates)) # add row number to summary table
     
-    return(round(estimates, decimal))
+    if (showTable) {
+        return(round(estimates, decimal))
+    }
 }
 
 

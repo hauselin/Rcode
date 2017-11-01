@@ -1,3 +1,4 @@
+# Last modified by Hause Lin 23-10-17 0:50 PM
 summarySE2 <- function (data = NULL, measurevar, groupvars = NULL, na.rm = TRUE, conf.interval = 0.95) {
     
     #install packages if necessary
@@ -124,3 +125,7 @@ summarySEwithin2 <- function (data = NULL, measurevar, betweenvars = NULL, withi
     
     return(tbl_dt(merged))
 }
+
+
+#### test function ####
+# summarySEwithin2(data = ChickWeight, measurevar = "weight", betweenvars = "Diet", withinvars = "Time", idvar = "Chick")

@@ -1,4 +1,4 @@
-# Last modified by Hause Lin 20-09-17 17:21
+# Last modified by Hause Lin 23-10-17 0:50 PM
 
 #### z-score outlier detection ####
 outliersZ <- function(x, zCutOff = 1.96, replaceOutliersWith = NA, outlierIndices = FALSE, showZValues = FALSE, digits = 2) {

@@ -1,7 +1,8 @@
 reportLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', showTable = TRUE) {
+    # Last modified by Hause Lin 31-10-17 20:02
     # APA format
     message("Summary statistics for linear models fitted with lm()")
-    cat("r: .10 (small), .30 (medium), .50 (large) (Cohen, 1992)\nd: 0.20 (small), 0.50 (medium), .80 (large) (Cohen, 1992)\nR2: .02 (small), .13 (medium), .26 (large) (Cohen, 1992)")
+    cat("r: .10 (small), .30 (medium), .50 (large) (Cohen, 1992)\nd: 0.20 (small), 0.50 (medium), .80 (large) (Cohen, 1992)\nR2: .02 (small), .13 (medium), .26 (large) (Cohen, 1992)\n")
     
     estimates <- data.frame(coef(summary(model))) # get estimates and put in dataframe
     effectNames <- rownames(estimates) # get names of effects
@@ -34,8 +35,8 @@ reportLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', show
         estimateV <- ifelse(abs(estimateV) < 0.01, 
                             sprintf('%.3f', abs(estimateV)), 
                             sprintf('%.2f', abs(estimateV))) # character (absolute value)
-        if (.Platform$OS.type == 'unix') { # if linux/mac, ensure negative signs are dashes, not hyphens
-            estimateV <- ifelse(estimateSign == -1, paste0("–", estimateV), estimateV) # dash
+        if (.Platform$OS.type == 'unix') { # if linux/mac, ensure negative sign is minus, not hyphens
+            estimateV <- ifelse(estimateSign == -1, paste0("−", estimateV), estimateV) # minus
         } else {
             estimateV <- ifelse(estimateSign == -1, paste0("-", estimateV), estimateV) # hyphen
         }
@@ -51,8 +52,9 @@ reportLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', show
         statisticV <- ifelse(abs(statisticV) < 0.01, 
                              sprintf('%.3f', abs(statisticV)), 
                              sprintf('%.2f', abs(statisticV))) # character
-        if (.Platform$OS.type == 'unix') { # if linux/mac, ensure negative signs are dashes, not hyphens
-            statisticV <- ifelse(statisticSign == -1, paste0("–", statisticV), statisticV) # dash
+        
+        if (.Platform$OS.type == 'unix') { # if linux/mac, ensure negative sign is minus, not hyphens
+            statisticV <- ifelse(statisticSign == -1, paste0("−", statisticV), statisticV) # minus
         } else {
             statisticV <- ifelse(statisticSign == -1, paste0("-", statisticV), statisticV) # hyphen
         }
@@ -89,7 +91,6 @@ reportLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', show
                                 i, estimateV, seV, dfV, statisticV, substring(sprintf('%.3f', pV), 2), substring(sprintf('%.2f', rV), 2)))
                 
             }
-            
         }
     }
 
