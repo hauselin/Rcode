@@ -29,6 +29,10 @@ se <- function (data = NULL, measurevar, groupvars = NULL, na.rm = TRUE, conf.in
     
     for (i in 1:length(measurevar)) {
         
+        if (sum( data.frame(data)[, measurevar[i]] %in% c(Inf, -Inf)) > 0) { # if measurvar contains Inf or -Inf, stop the script
+            stop(paste0("\nInf or -Inf is in ", measurevar[i], " variable"))
+        }
+        
         # compute mean by group
         datac <- data[, .(unlist(lapply(.SD, length2, na.rm = na.rm)), 
                           unlist(lapply(.SD, mean, na.rm = na.rm)),
@@ -58,7 +62,9 @@ se <- function (data = NULL, measurevar, groupvars = NULL, na.rm = TRUE, conf.in
 
 #### test function ####
 # se(data = mtcars, measurevar = "disp", groupvars = c("cyl"))
+# se(data = mtcars, measurevar = c("mpg", "disp"), groupvars = c("cyl", "am"))
 # se(data = mtcars, measurevar = c("mpg", "disp"), groupvars = c("cyl", "vs"))
+# se(data = ChickWeight, measurevar = "weight", groupvars = "Diet")
 
 
 
@@ -170,8 +176,12 @@ seWithin <- function (data = NULL, measurevar, betweenvars = NULL, withinvars = 
     
     for (i in 1:length(measurevar)) {
         
+        if (sum( data[, measurevar[i]] %in% c(Inf, -Inf)) > 0) { # if measurvar contains Inf or -Inf, stop the script
+            stop(paste0("\nInf or -Inf is in ", measurevar[i], " variable"))
+        }
+        
         # Get the means from the un-normed data
-        datac <- summarySE2(data, measurevar[i], groupvars = c(betweenvars, withinvars),
+        datac <- se(data, measurevar[i], groupvars = c(betweenvars, withinvars),
                             na.rm = na.rm, conf.interval = conf.interval)
         
         # Drop all the unused columns (these will be calculated with normed data)
