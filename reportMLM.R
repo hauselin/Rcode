@@ -110,7 +110,7 @@ reportMLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', par
 }
 
 
-#### test function #####
+#### examples ####
 # library(lme4); library(lmerTest)
 # model1 <- lmer(weight ~ Time  + (1 + Time | Chick), data = ChickWeight)
 # model2 <- lmer(-weight ~ Time  + (1 + Time | Chick), data = ChickWeight)

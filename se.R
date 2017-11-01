@@ -60,7 +60,7 @@ se <- function (data = NULL, measurevar, groupvars = NULL, na.rm = TRUE, conf.in
     
 }
 
-#### test function ####
+#### examples ####
 # se(data = mtcars, measurevar = "disp", groupvars = c("cyl"))
 # se(data = mtcars, measurevar = c("mpg", "disp"), groupvars = c("cyl", "am"))
 # se(data = mtcars, measurevar = c("mpg", "disp"), groupvars = c("cyl", "vs"))
@@ -113,14 +113,7 @@ normWithin <- function (data = NULL, idvar, measurevar, betweenvars = NULL, na.r
     return(data.frame(dataNew))
 }
 
-#### test function ####
-# data <- ChickWeight
-# dvar <- "Chick"
-# measurevar <- "weight"
-# betweenvars <- "Diet"
-# subjMean <- "subjMean"
-# na.rm = T
-# tbl_dt(normWithin(data = ChickWeight, idvar = "Chick", measurevar = "weight", betweenvars = "Diet"))
+#### examples ####
 # normWithin(data = sleep, idvar = "ID", measurevar = "extra", betweenvars = "group") %>% arrange(ID)
 
 
@@ -229,7 +222,7 @@ seWithin <- function (data = NULL, measurevar, betweenvars = NULL, withinvars = 
     
 }
 
-#### test function ####
+#### examples ####
 # seWithin(data = ChickWeight, measurevar = "weight", betweenvars = "Diet", withinvars = "Time", idvar = "Chick")
 # library(ggplot2)
 # seWithin(data = diamonds, measurevar = c("carat"), betweenvars = "cut", withinvars = "color", idvar = "clarity")

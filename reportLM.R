@@ -102,7 +102,7 @@ reportLM <- function(model, decimal = 3, intercept = FALSE, format = 'apa', show
     
 }
 
-#### test function #####
+#### examples ####
 # model1 <- lm(weight ~ Time, data = ChickWeight)
 # model2 <- lm(-weight ~ Time, data = ChickWeight)
 # summary(model1)
