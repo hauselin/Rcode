@@ -1,10 +1,12 @@
-## Gives count, mean, standard deviation, standard error of the mean, and confidence interval (default 95%).
-##   data: a data frame.
-##   measurevar: the name of a column that contains the variable to be summariezed
-##   groupvars: a vector containing names of columns that contain grouping variables
-##   na.rm: a boolean that indicates whether to ignore NA's
-##   conf.interval: the percent range of the confidence interval (default is 95%)
-se <- function (data = NULL, measurevar, groupvars = NULL, na.rm = TRUE, conf.interval = 0.95) {
+#' Gives count, mean, standard deviation, standard error of the mean, and confidence interval (default 95%).
+#'    data: a data frame.
+#'    measurevar: the name of a column that contains the variable to be summariezed
+#'    groupvars: a vector containing names of columns that contain grouping variables
+#'    na.rm: a boolean that indicates whether to ignore NA's
+#'    conf.interval: the percent range of the confidence interval (default is 95%)
+#'    http://www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)/
+
+se <- function (data = NULL, measurevar, groupvars = NULL, na.rm = TRUE, conf.interval = 0.95, toNumeric = TRUE) {
     
     # install packages if necessary
     packages <- c("dplyr", "data.table", "dtplyr")
@@ -47,6 +49,21 @@ se <- function (data = NULL, measurevar, groupvars = NULL, na.rm = TRUE, conf.in
         
         ciMult <- qt(conf.interval / 2 + 0.5, unlist(datac$N) - 1)
         datac[, ci := se * ciMult]
+        
+        if (toNumeric) {
+            # convert columns to numeric class if possible, else, leave as character
+            oldwarning <- getOption("warn")
+            options(warn = -1)
+            for (j in 1:(ncol(datac)-4)) { # exclude last few columns (outcome, sd, se, ci)
+                if (sum(is.na(as.numeric(as.character(datac[[j]])))) == 0) {
+                    datac[[j]] <- as.numeric(datac[[j]])
+                } else {
+                    datac[[j]] <- as.character(datac[[j]])
+                }
+            }
+            options(warn = oldwarning)    
+        }
+        
         
         resultsList[[measurevar[i]]] <- tbl_df(datac)
         
@@ -137,10 +154,10 @@ normWithin <- function (data = NULL, idvar, measurevar, betweenvars = NULL, na.r
 ##   idvar: the name of a column that identifies each subject (or matched subjects)
 ##   na.rm: a boolean that indicates whether to ignore NA's
 ##   conf.interval: the percent range of the confidence interval (default is 95%)
+#'    showNormed: whether to show the normed version of the outcome variable
 
 # within-subjects CI (normed and un-normed versions)
-seWithin <- function (data = NULL, measurevar, betweenvars = NULL, withinvars = NULL, 
-                              idvar = NULL, na.rm = TRUE, conf.interval = 0.95) {
+seWithin <- function (data = NULL, measurevar, betweenvars = NULL, withinvars = NULL, idvar = NULL, na.rm = TRUE, conf.interval = 0.95, showNormed = FALSE) {
     
     # install packages if necessary
     packages <- c("dplyr", "data.table", "dtplyr")
@@ -153,7 +170,7 @@ seWithin <- function (data = NULL, measurevar, betweenvars = NULL, withinvars = 
     
     data <- data.frame(data) # convert to data.frame
     
-    # Check if betwenvars and withinvars are factors
+    # Check if betweenvars and withinvars are factors
     factorvars <- sapply(data[, c(betweenvars, withinvars), drop = FALSE], 
                          FUN = is.factor)
     # Ensure that the betweenvars and withinvars are factors
@@ -169,13 +186,13 @@ seWithin <- function (data = NULL, measurevar, betweenvars = NULL, withinvars = 
     
     for (i in 1:length(measurevar)) {
         
-        if (sum( data[, measurevar[i]] %in% c(Inf, -Inf)) > 0) { # if measurvar contains Inf or -Inf, stop the script
+        # if measurvar contains Inf or -Inf, stop the script
+        if (sum( data[, measurevar[i]] %in% c(Inf, -Inf)) > 0) { 
             stop(paste0("\nInf or -Inf is in ", measurevar[i], " variable"))
         }
         
         # Get the means from the un-normed data
-        datac <- se(data, measurevar[i], groupvars = c(betweenvars, withinvars),
-                            na.rm = na.rm, conf.interval = conf.interval)
+        datac <- se(data, measurevar[i], groupvars = c(betweenvars, withinvars), na.rm = na.rm, conf.interval = conf.interval, toNumeric = FALSE)
         
         # Drop all the unused columns (these will be calculated with normed data)
         datac$sd <- NULL
@@ -189,8 +206,7 @@ seWithin <- function (data = NULL, measurevar, betweenvars = NULL, withinvars = 
         measurevar_n <- paste(measurevar[i], "Normed", sep = "")
         
         # Collapse the normed data - now we can treat between and within vars the same
-        ndatac <- se(ndata, measurevar_n, groupvars = c(betweenvars, withinvars),
-                     na.rm = na.rm, conf.interval = conf.interval)
+        ndatac <- se(ndata, measurevar_n, groupvars = c(betweenvars, withinvars), na.rm = na.rm, conf.interval = conf.interval, toNumeric = FALSE)
         
         # Apply correction from Morey (2008) to the standard error and confidence interval
         # Get the product of the number of conditions of within-S variables
@@ -198,21 +214,43 @@ seWithin <- function (data = NULL, measurevar, betweenvars = NULL, withinvars = 
         correctionFactor <- sqrt( nWithinGroups / (nWithinGroups-1) )
         
         ndatacTbl <- tbl_dt(ndatac)
-        
+    
         # Apply the correction factor
+        # setnames(ndatacTbl, c("sd", "se"), c("stdev", "stderror"))
+        # print(ndatacTbl)
         ndatacTbl[, `:=` (sd = sd * correctionFactor, se = se * correctionFactor, ci = ci * correctionFactor)]
+        # print(ndatacTbl)
+        # setnames(ndatacTbl, c("stdev", "stderror"), c("sd", "se"))
         
         # Combine the un-normed means with the normed results
         merged <- left_join(datac, ndatacTbl)
         merged <- mutate_if(merged, is.factor, as.character) #if factor, convert to character
         merged[order( unlist((merged[, 1])), decreasing =  F), ] #arrange by first column
+        merged <- tbl_dt(merged)
         message("Factors have been converted to characters.")
         
-        resultsList[[measurevar[i]]] <- merged
+        # convert columns to numeric class if possible, else, leave as character
+        oldwarning <- getOption("warn")
+        options(warn = -1)
+        for (j in 1:(ncol(merged)-4)) { # exclude last few columns (outcome, sd, se, ci)
+            if (sum(is.na(as.numeric(as.character(merged[[j]])))) == 0) {
+                merged[[j]] <- as.numeric(merged[[j]])
+            } else {
+                merged[[j]] <- as.character(merged[[j]])
+            }
+        }
+        options(warn = oldwarning)
+        
+        # whether to show normed version
+        if (showNormed == FALSE) {
+            # print(measurevar_n)
+            merged[, (measurevar_n) := NULL]
+        } 
+        
+        resultsList[[measurevar[i]]] <- data.table(merged)
+        message(cat("Confidence intervals: ", conf.interval, sep = ""))
         
     }
-    
-    
     
     if (length(measurevar) == 1) {
         return(resultsList[[measurevar[1]]])
@@ -224,6 +262,7 @@ seWithin <- function (data = NULL, measurevar, betweenvars = NULL, withinvars = 
 
 #### examples ####
 # seWithin(data = ChickWeight, measurevar = "weight", betweenvars = "Diet", withinvars = "Time", idvar = "Chick")
+# seWithin(data = ChickWeight, measurevar = "weight", betweenvars = "Diet", withinvars = "Time", idvar = "Chick", showNormed = TRUE)
 # library(ggplot2)
 # seWithin(data = diamonds, measurevar = c("carat"), betweenvars = "cut", withinvars = "color", idvar = "clarity")
 # a <- seWithin(data = diamonds, measurevar = c("carat", "depth", "z"), betweenvars = "cut", withinvars = "color", idvar = "clarity")

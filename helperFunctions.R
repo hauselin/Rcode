@@ -1,0 +1,6 @@
+source("/Users/Hause/Dropbox/Working Datasets/functionsR/se.R")
+source("/Users/Hause/Dropbox/Working Datasets/functionsR/es.R")
+source('/Users/Hause/Dropbox/Working Datasets/functionsR/outliersMAD.R')
+source('/Users/Hause/Dropbox/Working Datasets/functionsR/cleanQuestionnaire.R')
+source('/Users/Hause/Dropbox/Working Datasets/functionsR/cleanQuestionnairePsychopy.R')
+source('/Users/Hause/Dropbox/Working Datasets/functionsR/summaryh.R')
