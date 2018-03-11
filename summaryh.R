@@ -1,17 +1,4 @@
-# Last modified by Hause Lin 09-03-18 22:56 hauselin@gmail.com
-
-cat("r: .10 (small), .30 (medium), .50 (large) (Cohen, 1992)\n")
-cat("d: 0.20 (small), 0.50 (medium), .80 (large) (Cohen, 1992)\n")
-cat("R2: .02 (small), .13 (medium), .26 (large) (Cohen, 1992)\n")
-
-# install really useful packages
-packages <- c("dplyr", "data.table", "piecewiseSEM", "compute.es")
-toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
-if (length(toInstall)) {
-    install.packages(toInstall)
-} else {
-    library(dplyr); library(data.table); library(piecewiseSEM); library(compute.es)
-}
+# Last modified by Hause Lin 10-03-18 20:59 hauselin@gmail.com
 
 cat("r: .10 (small), .30 (medium), .50 (large) (Cohen, 1992)\n")
 cat("d: 0.20 (small), 0.50 (medium), .80 (large) (Cohen, 1992)\n")
