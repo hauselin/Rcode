@@ -34,9 +34,9 @@ summaryh <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable
         reportTtest(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable)
     } else if (grepl("Pearson's product-moment correlation", model$method, ignore.case = T)) {
         reportCortestPearson(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable)
-    } else if (grepl("kendall", model$method, ignore.case = T)) {
+    } else if (grepl("Kendall's rank correlation tau", model$method, ignore.case = T)) {
         reportCortest(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable) 
-    } else if (grepl("spearman", model$method, ignore.case = T)) {
+    } else if (grepl("Spearman's rank correlation rho", model$method, ignore.case = T)) {
         reportCortest(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable) 
     } else if (grepl("Pearson's Chi-squared test", model$method, ignore.case = T)) {
         reportCHISQ(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable)
@@ -337,7 +337,7 @@ reportCortest <- function(model, decimal = 2, showTable = FALSE, showEffectSizes
     estimates$es.d <- es(r = estimates$estimate, msg = F, decimal = decimal)$d # d
     
     # make a copy of estimates and convert to correct dp
-    estimatesCopy <- estimates[, -1]
+    estimatesCopy <- estimates
     estimatesRound <- estimatesCopy
     estimatesRound[abs(estimatesCopy) >= 0.01] <- round(estimatesRound[abs(estimatesCopy) >= 0.01], decimal)
     estimatesRound[abs(estimatesCopy) >= 0.01] <- sprintf(digits, estimatesCopy[abs(estimatesCopy) >= 0.01])
