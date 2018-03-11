@@ -6,16 +6,19 @@
 #'    conf.interval: the percent range of the confidence interval (default is 95%)
 #'    http://www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)/
 
+  
+#' Last modified by Hause Lin 10-03-18 21:25 hauselin@gmail.com
+
+# install packages if necessary
+packages <- c("dplyr", "data.table", "dtplyr")
+toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
+if (length(toInstall)) {
+    install.packages(toInstall)
+} else {
+    library(dplyr); library(data.table); library(dtplyr)
+}
+
 se <- function (data = NULL, measurevar, groupvars = NULL, na.rm = TRUE, conf.interval = 0.95, toNumeric = TRUE) {
-    
-    # install packages if necessary
-    packages <- c("dplyr", "data.table", "dtplyr")
-    toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
-    if (length(toInstall)) {
-        install.packages(toInstall)
-    } else {
-        library(dplyr); library(data.table); library(dtplyr)
-    }
     
     # convert to datatable and tibble
     data <- tbl_dt(data)
@@ -101,15 +104,6 @@ se <- function (data = NULL, measurevar, groupvars = NULL, na.rm = TRUE, conf.in
 # norm data (this function will only be used by seWithin, and won't have to be called directly)
 normWithin <- function (data = NULL, idvar, measurevar, betweenvars = NULL, na.rm = TRUE) {
     
-    # install packages if necessary
-    packages <- c("dplyr", "data.table", "dtplyr")
-    toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
-    if (length(toInstall)) {
-        install.packages(toInstall)
-    } else {
-        library(dplyr); library(data.table); library(dtplyr)
-    }
-    
     data <- tbl_dt(data)
     setkeyv(data, idvar) # sort by idvar
     
@@ -158,15 +152,6 @@ normWithin <- function (data = NULL, idvar, measurevar, betweenvars = NULL, na.r
 
 # within-subjects CI (normed and un-normed versions)
 seWithin <- function (data = NULL, measurevar, betweenvars = NULL, withinvars = NULL, idvar = NULL, na.rm = TRUE, conf.interval = 0.95, showNormed = FALSE) {
-    
-    # install packages if necessary
-    packages <- c("dplyr", "data.table", "dtplyr")
-    toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
-    if (length(toInstall)) {
-        install.packages(toInstall)
-    } else {
-        library(dplyr); library(data.table); library(dtplyr)
-    }
     
     data <- data.frame(data) # convert to data.frame
     
