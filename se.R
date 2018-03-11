@@ -6,7 +6,6 @@
 #'    conf.interval: the percent range of the confidence interval (default is 95%)
 #'    http://www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)/
 
-  
 #' Last modified by Hause Lin 10-03-18 21:25 hauselin@gmail.com
 
 # install packages if necessary

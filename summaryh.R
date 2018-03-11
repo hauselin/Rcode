@@ -32,13 +32,13 @@ summaryh <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable
         reportMLM(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable)
     } else if (grepl("t-test", model$method, ignore.case = T)) {
         reportTtest(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable)
-    } else if (grepl("pearson", model$method, ignore.case = T)) {
+    } else if (grepl("Pearson's product-moment correlation", model$method, ignore.case = T)) {
         reportCortestPearson(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable)
     } else if (grepl("kendall", model$method, ignore.case = T)) {
         reportCortest(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable) 
     } else if (grepl("spearman", model$method, ignore.case = T)) {
         reportCortest(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable) 
-    } else if (grepl("chi-square", model$method, ignore.case = T)) {
+    } else if (grepl("Pearson's Chi-squared test", model$method, ignore.case = T)) {
         reportCHISQ(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable)
     } else {
         # modelClass <- class(model)[1]
@@ -46,11 +46,21 @@ summaryh <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable
     }
 }
 
+
+
+
+
+
+
 reportLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable = FALSE) {
     
     # ensure significant digits with sprintf
     digits <- paste0("%.", decimal, "f") # e.g, 0.10 not 0.1, 0.009, not 0.01
-    pdigits <- paste0("%.", decimal + 1, "f") # e.g, 0.10 not 0.1, 0.009, not 0.01
+    if (decimal <= 2) {
+        pdigits <- paste0("%.", 3, "f")
+    } else {
+        pdigits <- paste0("%.", decimal, "f")
+    }
     
     # example output: b = −2.88, SE = 0.32, t(30) = −8.92, p < .001, r = .85
     estimates <- data.frame(coef(summary(model))) # get estimates and put in dataframe
@@ -70,10 +80,12 @@ reportLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable
     estimates$es.r.squared <- summary(model)$r.squared
     estimates$es.adj.r.squared <- summary(model)$adj.r.squared
     
-    # make a copy of estimates and convert o correct dp
-    estimatesRound <- apply(estimates[, -1], 2, function(x) ifelse(abs(x) < 0.01, round(x, 3), round(x, decimal)))
-    estimatesRound <- apply(estimatesRound, 2, function(x) ifelse(abs(x) < 0.01, sprintf(pdigits, x), sprintf(digits, x)))
-    estimatesRound <- data.frame(term = estimates$term, estimatesRound, stringsAsFactors = FALSE)
+    # make a copy of estimates and convert to correct dp
+    estimatesCopy <- estimates[, -1]
+    estimatesRound <- estimatesCopy
+    estimatesRound[abs(estimatesCopy) >= 0.01] <- round(estimatesRound[abs(estimatesCopy) >= 0.01], decimal)
+    estimatesRound[abs(estimatesCopy) >= 0.01] <- sprintf(digits, estimatesCopy[abs(estimatesCopy) >= 0.01])
+    estimatesRound[abs(estimatesCopy) < 0.01] <- sprintf(pdigits, estimatesCopy[abs(estimatesCopy) < 0.01])
     
     # fix p values
     estimatesRound$p.value <- round(estimates$p.value, decimal + 2)
@@ -142,7 +154,11 @@ reportAOV <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
     
     # ensure significant digits with sprintf
     digits <- paste0("%.", decimal, "f") # e.g, 0.10 not 0.1, 0.009, not 0.01
-    pdigits <- paste0("%.", decimal + 1, "f") # e.g, 0.10 not 0.1, 0.009, not 0.01
+    if (decimal <= 2) {
+        pdigits <- paste0("%.", 3, "f")
+    } else {
+        pdigits <- paste0("%.", decimal, "f")
+    }
     
     # example output: F(3, 10) = 39, p < .001, r = 0.32
     if (class(model)[1] == "anova") {
@@ -160,12 +176,14 @@ reportAOV <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
     
     # effect sizes
     estimates$es.f <- cohens_f(model)
-    estimates$es.r <- es(f = estimates$es.f, msg = F)$r
+    estimates$es.r <- es(f = estimates$es.f, msg = F, decimal = decimal)$r
     
-    # make a copy of estimates and convert o correct dp
-    estimatesRound <- apply(estimates[, -1], 2, function(x) ifelse(abs(x) < 0.01, round(x, 3), round(x, decimal)))
-    estimatesRound <- apply(estimatesRound, 2, function(x) ifelse(abs(x) < 0.01, sprintf(pdigits, x), sprintf(digits, x)))
-    estimatesRound <- data.frame(term = estimates$term, estimatesRound, stringsAsFactors = FALSE)
+    # make a copy of estimates and convert to correct dp
+    estimatesCopy <- estimates[, -1]
+    estimatesRound <- estimatesCopy
+    estimatesRound[abs(estimatesCopy) >= 0.01] <- round(estimatesRound[abs(estimatesCopy) >= 0.01], decimal)
+    estimatesRound[abs(estimatesCopy) >= 0.01] <- sprintf(digits, estimatesCopy[abs(estimatesCopy) >= 0.01])
+    estimatesRound[abs(estimatesCopy) < 0.01] <- sprintf(pdigits, estimatesCopy[abs(estimatesCopy) < 0.01])
     
     # fix p values
     estimatesRound$p.value <- round(estimates$p.value, decimal + 2)
@@ -216,19 +234,6 @@ reportAOV <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
     
 }
 
-#### examples ####
-# model1 <- lm(weight ~ Time, data = ChickWeight)
-# model2 <- lm(-weight ~ Time, data = ChickWeight)
-# model3 <- lm(mpg ~ drat, data = mtcars)
-# # summary(model3)
-# # reportAOV(model1)
-# reportAOV(model1)
-# # reportAOV(model3, 2)
-# # summary(model2)
-# reportAOV(model3)
-# reportAOV(model3, showTable = T, decimal = 3)
-# reportAOV(model3, showTable = T, showEffectSizesTable = T, decimal = 3)
-# reportAOV(model3, showTable = F, showEffectSizesTable = T, decimal = 2)
 
 
 
@@ -237,7 +242,11 @@ reportCHISQ <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTa
     
     # ensure significant digits with sprintf
     digits <- paste0("%.", decimal, "f") # e.g, 0.10 not 0.1, 0.009, not 0.01
-    pdigits <- paste0("%.", decimal + 1, "f") # p values always 1 more digit
+    if (decimal <= 2) {
+        pdigits <- paste0("%.", 3, "f")
+    } else {
+        pdigits <- paste0("%.", decimal, "f")
+    }
     
     # example output: r(30) = 0.82, p < .001
     estimates <- data.frame(df = model$parameter, 
@@ -250,9 +259,11 @@ reportCHISQ <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTa
     estimates$es.r <- computeES$r
     
     # make a copy of estimates and convert to correct dp
-    estimatesRound <- sapply(estimates, function(x) ifelse(abs(x) < 0.01, round(x, 3), round(x, decimal)))
-    estimatesRound <- sapply(estimatesRound, function(x) ifelse(abs(x) < 0.01, sprintf(pdigits, x), sprintf(digits, x)))
-    estimatesRound <- data.frame(as.list(estimatesRound), stringsAsFactors = FALSE)
+    estimatesCopy <- estimates[, -1]
+    estimatesRound <- estimatesCopy
+    estimatesRound[abs(estimatesCopy) >= 0.01] <- round(estimatesRound[abs(estimatesCopy) >= 0.01], decimal)
+    estimatesRound[abs(estimatesCopy) >= 0.01] <- sprintf(digits, estimatesCopy[abs(estimatesCopy) >= 0.01])
+    estimatesRound[abs(estimatesCopy) < 0.01] <- sprintf(pdigits, estimatesCopy[abs(estimatesCopy) < 0.01])
     
     # fix p values
     estimatesRound$p.value <- round(estimates$p.value, decimal + 2)
@@ -309,7 +320,11 @@ reportCortest <- function(model, decimal = 2, showTable = FALSE, showEffectSizes
     
     # ensure significant digits with sprintf
     digits <- paste0("%.", decimal, "f") # e.g, 0.10 not 0.1, 0.009, not 0.01
-    pdigits <- paste0("%.", decimal + 1, "f") # p values always 1 more digit
+    if (decimal <= 2) {
+        pdigits <- paste0("%.", 3, "f")
+    } else {
+        pdigits <- paste0("%.", decimal, "f")
+    }
     
     # example output: r = 0.82, p < .001
     estimates <- data.frame(estimate = model$estimate, 
@@ -319,12 +334,14 @@ reportCortest <- function(model, decimal = 2, showTable = FALSE, showEffectSizes
     rownames(estimates) <- NULL
     
     # effect sizes
-    estimates$es.d <- es(r = estimates$estimate, msg = F)$d # d
+    estimates$es.d <- es(r = estimates$estimate, msg = F, decimal = decimal)$d # d
     
     # make a copy of estimates and convert to correct dp
-    estimatesRound <- sapply(estimates, function(x) ifelse(abs(x) < 0.01, round(x, 3), round(x, decimal)))
-    estimatesRound <- sapply(estimatesRound, function(x) ifelse(abs(x) < 0.01, sprintf(pdigits, x), sprintf(digits, x)))
-    estimatesRound <- data.frame(as.list(estimatesRound), stringsAsFactors = FALSE)
+    estimatesCopy <- estimates[, -1]
+    estimatesRound <- estimatesCopy
+    estimatesRound[abs(estimatesCopy) >= 0.01] <- round(estimatesRound[abs(estimatesCopy) >= 0.01], decimal)
+    estimatesRound[abs(estimatesCopy) >= 0.01] <- sprintf(digits, estimatesCopy[abs(estimatesCopy) >= 0.01])
+    estimatesRound[abs(estimatesCopy) < 0.01] <- sprintf(pdigits, estimatesCopy[abs(estimatesCopy) < 0.01])
     
     # fix p values
     estimatesRound$p.value <- round(estimates$p.value, decimal + 2)
@@ -378,7 +395,11 @@ reportCortestPearson <- function(model, decimal = 2, showTable = FALSE, showEffe
     
     # ensure significant digits with sprintf
     digits <- paste0("%.", decimal, "f") # e.g, 0.10 not 0.1, 0.009, not 0.01
-    pdigits <- paste0("%.", decimal + 1, "f") # p values always 1 more digit
+    if (decimal <= 2) {
+        pdigits <- paste0("%.", 3, "f")
+    } else {
+        pdigits <- paste0("%.", decimal, "f")
+    }
     
     # example output: r(30) = 0.82, p < .001
     
@@ -394,11 +415,12 @@ reportCortestPearson <- function(model, decimal = 2, showTable = FALSE, showEffe
     # effect sizes
     estimates$es.d <- (2 * estimates$statistic) / sqrt(estimates$df) # d
     
-    
     # make a copy of estimates and convert to correct dp
-    estimatesRound <- sapply(estimates, function(x) ifelse(abs(x) < 0.01, round(x, 3), round(x, decimal)))
-    estimatesRound <- sapply(estimatesRound, function(x) ifelse(abs(x) < 0.01, sprintf(pdigits, x), sprintf(digits, x)))
-    estimatesRound <- data.frame(as.list(estimatesRound), stringsAsFactors = FALSE)
+    estimatesCopy <- estimates[, -1]
+    estimatesRound <- estimatesCopy
+    estimatesRound[abs(estimatesCopy) >= 0.01] <- round(estimatesRound[abs(estimatesCopy) >= 0.01], decimal)
+    estimatesRound[abs(estimatesCopy) >= 0.01] <- sprintf(digits, estimatesCopy[abs(estimatesCopy) >= 0.01])
+    estimatesRound[abs(estimatesCopy) < 0.01] <- sprintf(pdigits, estimatesCopy[abs(estimatesCopy) < 0.01])
     
     # fix p values
     estimatesRound$p.value <- round(estimates$p.value, decimal + 2)
@@ -452,7 +474,11 @@ reportGLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
     
     # ensure significant digits with sprintf
     digits <- paste0("%.", decimal, "f") # e.g, 0.10 not 0.1, 0.009, not 0.01
-    pdigits <- paste0("%.", decimal + 1, "f") # e.g, 0.10 not 0.1, 0.009, not 0.01
+    if (decimal <= 2) {
+        pdigits <- paste0("%.", 3, "f")
+    } else {
+        pdigits <- paste0("%.", decimal, "f")
+    }
     
     # example output: b = −2.88, SE = 0.32, z(30) = −8.92, p < .001, r = .85
     estimates <- data.frame(coef(summary(model))) # get estimates and put in dataframe
@@ -465,13 +491,15 @@ reportGLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
     
     # effect sizes
     estimates$es.oddsratio <- exp(estimates$estimate)
-    estimates$es.r <- es(oddsratio = estimates$es.oddsratio, msg = F)$r # r
-    estimates$es.d <- es(oddsratio = estimates$es.oddsratio, msg = F)$d # d
+    estimates$es.r <- es(oddsratio = estimates$es.oddsratio, msg = F, decimal = decimal)$r # r
+    estimates$es.d <- es(oddsratio = estimates$es.oddsratio, msg = F, decimal = decimal)$d # d
     
-    # make a copy of estimates and convert o correct dp
-    estimatesRound <- apply(estimates[, -1], 2, function(x) ifelse(abs(x) < 0.01, round(x, 3), round(x, decimal)))
-    estimatesRound <- apply(estimatesRound, 2, function(x) ifelse(abs(x) < 0.01, sprintf(pdigits, x), sprintf(digits, x)))
-    estimatesRound <- data.frame(term = estimates$term, estimatesRound, stringsAsFactors = FALSE)
+    # make a copy of estimates and convert to correct dp
+    estimatesCopy <- estimates[, -1]
+    estimatesRound <- estimatesCopy
+    estimatesRound[abs(estimatesCopy) >= 0.01] <- round(estimatesRound[abs(estimatesCopy) >= 0.01], decimal)
+    estimatesRound[abs(estimatesCopy) >= 0.01] <- sprintf(digits, estimatesCopy[abs(estimatesCopy) >= 0.01])
+    estimatesRound[abs(estimatesCopy) < 0.01] <- sprintf(pdigits, estimatesCopy[abs(estimatesCopy) < 0.01])
     
     # fix p values
     estimatesRound$p.value <- round(estimates$p.value, decimal + 2)
@@ -523,19 +551,17 @@ reportGLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
     
 }
 
-#### examples ####
-# model1 <- glm(vs ~ mpg, mtcars, family = "binomial")
-# reportGLM(model1)
-# reportGLM(model1, 3, T, T)
-
-
 
 
 reportMLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable = FALSE) {
     
     # ensure significant digits with sprintf
     digits <- paste0("%.", decimal, "f") # e.g, 0.10 not 0.1, 0.009, not 0.01
-    pdigits <- paste0("%.", decimal + 1, "f") # p values always 1 more digit
+    if (decimal <= 2) {
+        pdigits <- paste0("%.", 3, "f")
+    } else {
+        pdigits <- paste0("%.", decimal, "f")
+    }
     
     # example output: b = −2.88, SE = 0.32, t(30) = −8.92, p < .001, r = .85
     estimates <- data.frame(coef(summary(model))) # get estimates and put in dataframe
@@ -550,9 +576,11 @@ reportMLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
     estimates$es.d <-  (2 * estimates$statistic) / sqrt(estimates$df) # d
     
     # make a copy of estimates and convert to correct dp
-    estimatesRound <- apply(estimates[, -1], 2, function(x) ifelse(abs(x) < 0.01, round(x, 3), round(x, decimal)))
-    estimatesRound <- apply(estimatesRound, 2, function(x) ifelse(abs(x) < 0.01, sprintf(pdigits, x), sprintf(digits, x)))
-    estimatesRound <- data.frame(term = estimates$term, estimatesRound, stringsAsFactors = FALSE)
+    estimatesCopy <- estimates[, -1]
+    estimatesRound <- estimatesCopy
+    estimatesRound[abs(estimatesCopy) >= 0.01] <- round(estimatesRound[abs(estimatesCopy) >= 0.01], decimal)
+    estimatesRound[abs(estimatesCopy) >= 0.01] <- sprintf(digits, estimatesCopy[abs(estimatesCopy) >= 0.01])
+    estimatesRound[abs(estimatesCopy) < 0.01] <- sprintf(pdigits, estimatesCopy[abs(estimatesCopy) < 0.01])
     
     # fix p values
     estimatesRound$p.value <- round(estimates$p.value, decimal + 2)
@@ -633,7 +661,11 @@ reportTtest <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTa
     
     # ensure significant digits with sprintf
     digits <- paste0("%.", decimal, "f") # e.g, 0.10 not 0.1, 0.009, not 0.01
-    pdigits <- paste0("%.", decimal + 1, "f") # p values always 1 more digit
+    if (decimal <= 2) {
+        pdigits <- paste0("%.", 3, "f")
+    } else {
+        pdigits <- paste0("%.", decimal, "f")
+    }
     
     # example output: t(30) = 5.82, p < .001
     estimates <- data.frame(df = model$parameter, 
@@ -646,9 +678,11 @@ reportTtest <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTa
     estimates$es.d <-  (2 * estimates$statistic) / sqrt(estimates$df) # d
     
     # make a copy of estimates and convert to correct dp
-    estimatesRound <- sapply(estimates, function(x) ifelse(abs(x) < 0.01, round(x, 3), round(x, decimal)))
-    estimatesRound <- sapply(estimatesRound, function(x) ifelse(abs(x) < 0.01, sprintf(pdigits, x), sprintf(digits, x)))
-    estimatesRound <- data.frame(as.list(estimatesRound), stringsAsFactors = FALSE)
+    estimatesCopy <- estimates[, -1]
+    estimatesRound <- estimatesCopy
+    estimatesRound[abs(estimatesCopy) >= 0.01] <- round(estimatesRound[abs(estimatesCopy) >= 0.01], decimal)
+    estimatesRound[abs(estimatesCopy) >= 0.01] <- sprintf(digits, estimatesCopy[abs(estimatesCopy) >= 0.01])
+    estimatesRound[abs(estimatesCopy) < 0.01] <- sprintf(pdigits, estimatesCopy[abs(estimatesCopy) < 0.01])
     
     # fix p values
     estimatesRound$p.value <- round(estimates$p.value, decimal + 2)
