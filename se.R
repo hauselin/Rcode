@@ -237,8 +237,10 @@ seWithin <- function (data = NULL, measurevar, betweenvars = NULL, withinvars = 
     }
     
     if (length(measurevar) == 1) {
+        print(resultsList[[measurevar[1]]])
         return(resultsList[[measurevar[1]]])
     } else {
+        print(resultsList)
         return(resultsList)
     }
     
