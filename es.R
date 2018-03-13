@@ -1,6 +1,6 @@
 es <- function(d = NULL, r = NULL, R2 = NULL, f = NULL, oddsratio = NULL, logoddsratio = NULL, auc = NULL, decimal = 3, msg = TRUE) {
     
-    # Last modified by Hause Lin 22-11-17 09:51 hauselin@gmail.com
+    # Last modified by Hause Lin 13-03-18 18:53 hauselin@gmail.com
     # effectsizes <- vector("list", 7) # list version
     effectsizes <- data.frame(matrix(NA, nrow = length(c(d, r, R2, f, oddsratio, logoddsratio, auc)), ncol = 7)) # dataframe version
     names(effectsizes) <- c("d", "r", "R2", "f", "oddsratio", "logoddsratio", "auc")
@@ -82,7 +82,6 @@ es <- function(d = NULL, r = NULL, R2 = NULL, f = NULL, oddsratio = NULL, logodd
 
 # es(d = 0.3)
 # es(d = 0.3, r = 0.2)
-# es(d = c(0.3, 0.4), r = 0.2, f = 0.5)
 # es(d = c(0.2, 0.3, 0.4))
 # es(d = c(0.2, 0.3))$r
 # es(r = 0.5)
