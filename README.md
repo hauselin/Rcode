@@ -14,7 +14,7 @@ summary(lm(mpg ~ cyl, mtcars)) # base R summary()
 summaryh(lm(mpg ~ cyl, mtcars)) # returns APA-formatted output
 
 # linear mixed effects regression
-library(lmer); library(lmerTest) # load packages to fit mixed effects models
+library(lme4); library(lmerTest) # load packages to fit mixed effects models
 model <- lmer(weight ~ Time  + (1 + Time | Chick), data = ChickWeight)
 summary(model)
 summaryh(model)
