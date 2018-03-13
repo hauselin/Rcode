@@ -15,7 +15,6 @@ cat("d: 0.20 (small), 0.50 (medium), .80 (large) (Cohen, 1992)\n")
 cat("R2: .02 (small), .13 (medium), .26 (large) (Cohen, 1992)\n")
 
 summaryh <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable = FALSE) {
-    scientificNotationDefault <- getOption("scipen")
     options(scipen = 999) # disable scientific notation
     if (class(model)[1] == 'lm') { # Last modified by Hause Lin 09-03-18 09:10 hauselin@gmail.com
         reportLM(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable) #
@@ -131,7 +130,7 @@ reportLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable
         outputList$effectSizes <- data.frame(term = as.character(estimates$term), effectSizes, stringsAsFactors = FALSE)
         
     }
-    
+    options(scipen = 0) # enable scientific notation
     if (length(outputList) > 1) {
         return(outputList)
     } else {
@@ -229,7 +228,7 @@ reportAOV <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
         outputList$effectSizes <- data.frame(term = as.character(estimates$term), effectSizes, stringsAsFactors = FALSE)
         
     }
-    
+    options(scipen = 0) # enable scientific notation
     if (length(outputList) > 1) {
         return(outputList)
     } else {
@@ -307,7 +306,7 @@ reportCHISQ <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTa
         outputList$effectSizes <- data.frame(term = as.character(model$data.name), as.list(effectSizes), stringsAsFactors = FALSE)
         
     }
-    
+    options(scipen = 0) # enable scientific notation
     if (length(outputList) > 1) {
         return(outputList)
     } else {
@@ -381,7 +380,7 @@ reportCortest <- function(model, decimal = 2, showTable = FALSE, showEffectSizes
         outputList$effectSizes <- data.frame(term = as.character(model$data.name), as.list(effectSizes), stringsAsFactors = FALSE)
         
     }
-    
+    options(scipen = 0) # enable scientific notation
     if (length(outputList) > 1) {
         return(outputList)
     } else {
@@ -465,7 +464,7 @@ reportCortestPearson <- function(model, decimal = 2, showTable = FALSE, showEffe
         outputList$effectSizes <- data.frame(term = as.character(model$data.name), as.list(effectSizes), stringsAsFactors = FALSE)
         
     }
-    
+    options(scipen = 0) # enable scientific notation
     if (length(outputList) > 1) {
         return(outputList)
     } else {
@@ -550,7 +549,7 @@ reportGLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
         outputList$effectSizes <- data.frame(term = as.character(estimates$term), effectSizes, stringsAsFactors = FALSE)
         
     }
-    
+    options(scipen = 0) # enable scientific notation
     if (length(outputList) > 1) {
         return(outputList)
     } else {
@@ -622,21 +621,19 @@ reportMLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
         # effect size semi partial R (Edwards et al., 2008)
         anovaModel <- data.frame(anova(model))
         colnames(anovaModel) <- tolower(colnames(anovaModel))
-        Fs <- anovaModel$f # F-values for each effect (marginal = type 3 SS with Satterthwaite (requires lmerTest package))
+        Fs <- anovaModel$f.value # F-values for each effect (marginal = type 3 SS with Satterthwaite (requires lmerTest package))
         numDF <- anovaModel$numdf #numerator DFs
         denDF <- anovaModel$dendf #denominator DFs
         semiPartialREffect <- (numDF / denDF * Fs) / (1 + (numDF / denDF * Fs)) # effect sizes
-        
-        if (length(semiPartialREffect) == nrow(estimates)) {
-            estimates$es.partR2 <- semiPartialREffect
-        } else if ( (nrow(estimates) - length(semiPartialREffect)) == 1 ) {
-            estimates$es.partR2 <- c(NA, semiPartialREffect)
+        semiPartialREffect <- data.frame(term = rownames(anovaModel), es.partR2 = semiPartialREffect, stringsAsFactors = F)
+        for (i in 1:nrow(semiPartialREffect)) {
+            estimates$es.partR2[grepl(semiPartialREffect$term[i], estimates$term)] <- semiPartialREffect[i, "es.partR2"]
         }
         
         # piecewiseSEM (Nakagawa & Schielzeth, 2013)
         rsquareds <- sem.model.fits(model)
-        estimates$es.R2marginal <- c(NA, rsquareds$Marginal)
-        estimates$es.R2conditional <- c(NA, rsquareds$Conditional)
+        estimates$es.R2marginal <- rsquareds$Marginal
+        estimates$es.R2conditional <- rsquareds$Conditional
         
         # format table nicely
         estimatesOutput <- apply(estimates[, -1], 2, round, decimal + 1)
@@ -652,7 +649,7 @@ reportMLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
         outputList$effectSizes <- data.frame(term = as.character(estimates$term), effectSizes, stringsAsFactors = FALSE)
         
     }
-    
+    options(scipen = 0) # enable scientific notation
     if (length(outputList) > 1) {
         return(outputList)
     } else {
@@ -731,7 +728,7 @@ reportTtest <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTa
         outputList$effectSizes <- data.frame(term = as.character(model$data.name), as.list(effectSizes), stringsAsFactors = FALSE)
         
     }
-    
+    options(scipen = 0) # enable scientific notation
     if (length(outputList) > 1) {
         return(outputList)
     } else {
