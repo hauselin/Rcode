@@ -2,7 +2,10 @@
 
 Helper functions for R.
 
-## Summarise statistical models in R (with effect sizes)
+* [Summarize statistical models in APA format](#Summarise statistical models plus effect sizes)
+* [Convert between effect sizes](#Convert between effect sizes)
+
+## Summarise statistical models plus effect sizes
 
 When fitting models, use ```summaryh()``` instead of ```summary()``` to get APA (American Psychological Association) formatted output that includes effect size estimates for each effect. The first time you ```source()``` the the functions, it might take some time because it will install a few R packages (e.g., dplyr). Subsequently, ```source()``` should load the functions much faster.
 
