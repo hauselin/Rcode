@@ -2,8 +2,9 @@
 
 Helper functions for R.
 
-* [Summarize statistical models in APA format](Summarise-statistical-models-plus-effect-sizes)
-* [Convert between effect sizes](Convert-between-effect-sizes)
+- [Summarise statistical models plus effect sizes](#summarise-statistical-models-plus-effect-sizes)
+- [Convert between effect sizes](#convert-between-effect-sizes)
+- [Detect and remove outliers](#detect-and-remove-outliers)
 
 ## Summarise statistical models plus effect sizes
 
