@@ -57,7 +57,7 @@ outliersMAD(x = example, MADCutOff = 3, replaceOutliersWith = -888) # Leys et al
 
 ## Compute between- and within-subjects standard errors and confidence intervals
 
-Code adapted from [Cookbook for R](http://www.cookbook-r.com/Graphs/)
+Code adapted from <a href="http://www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)/">Cookbook for R</a>
 
 When using the functions ```se``` (between-subjects) or ```seWithin``` (within-subjects), you can specify more than one outcome variable via the ```measurevar``` argument. If you specify more than one outcome variable, the output will be a list that has length of the number of outcome variables provided.
 
