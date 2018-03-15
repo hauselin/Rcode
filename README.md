@@ -1,10 +1,9 @@
 # R helper functions
 
-Helper functions for R.
-
 - [Summarise statistical models plus effect sizes](#summarise-statistical-models-plus-effect-sizes)
 - [Convert between effect sizes](#convert-between-effect-sizes)
 - [Detect and remove outliers](#detect-and-remove-outliers)
+- [Compute between- and within-subjects confidence intervals](#Compute-between--and-within-subjects-standard-errors-and-confidence-intervals)
 
 ## Summarise statistical models plus effect sizes
 
@@ -66,7 +65,7 @@ When using the functions ```se``` (between-subjects) or ```seWithin``` (within-s
 source("https://raw.githubusercontent.com/hauselin/Rcode/master/se.R") # load functions from my github site
 
 # between-subjects
-se(data = mtcars, measurevar = "disp", groupvars = c("cyl"))
+se(data = mtcars, measurevar = "disp", groupvars = "cyl")
 se(data = mtcars, measurevar = c("mpg", "disp"), groupvars = c("cyl", "am"))
 se(data = ChickWeight, measurevar = "weight", groupvars = "Diet")
 
