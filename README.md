@@ -3,11 +3,7 @@
 - [Summarise statistical models plus effect sizes](#summarise-statistical-models-plus-effect-sizes)
 - [Convert between effect sizes](#convert-between-effect-sizes)
 - [Detect and remove outliers](#detect-and-remove-outliers)
-- [Compute between- and within-subjects standard errors and confidence intervals](http://www.google.com)
-
-
-
-
+- [Compute between- and within-subjects standard errors and confidence intervals](#compute-between--and-within-subjects-standard-errors-and-confidence-intervals)
 
 ## Summarise statistical models plus effect sizes
 
