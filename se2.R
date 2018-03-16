@@ -9,18 +9,18 @@
 #' Last modified by Hause Lin 10-03-18 21:25 hauselin@gmail.com
 
 # install packages if necessary
-packages <- c("dplyr", "data.table", "dtplyr")
+packages <- c("dplyr", "data.table")
 toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
 if (length(toInstall)) {
     install.packages(toInstall)
 } else {
-    library(dplyr); library(data.table); library(dtplyr)
+    library(dplyr); library(data.table);
 }
 rm(packages); rm(toInstall)
 
-se <- function (data = NULL, measurevar, groupvars = NULL, na.rm = TRUE, conf.interval = 0.95, toNumeric = TRUE) {
-    
-    # convert to datatable and tibble
+se2 <- function (data = NULL, measurevar, groupvars = NULL, na.rm = TRUE, conf.interval = 0.95, toNumeric = TRUE, sampleSize = NULL) {
+    # between-subjects SE
+    # convert to datatable
     data <- data.table(data)
     
     # function to compute N without NAs
@@ -45,8 +45,18 @@ se <- function (data = NULL, measurevar, groupvars = NULL, na.rm = TRUE, conf.in
                       by = groupvars, .SDcols = measurevar[i]]
         
         setnames(datac, c(groupvars, "N", measurevar[i], "sd")) # rename column names
-        
+        datac <- data.table(datac)
         setkeyv(datac, groupvars) # sort table
+        
+        if (!is.null(sampleSize)) {
+            if (is.vector(sampleSize)) {
+                datac$N <- sampleSize
+            } else {
+                datac$N <- NULL
+                datac <- left_join(datac, sampleSize)
+                datac <- data.table(datac)
+            }
+        }
         
         datac[, se := sd / sqrt(N)] # compute standard error
         
@@ -67,9 +77,9 @@ se <- function (data = NULL, measurevar, groupvars = NULL, na.rm = TRUE, conf.in
             options(warn = oldwarning)    
         }
         
-        
-        resultsList[[measurevar[i]]] <- tbl_df(datac)
-        
+        datac <- select(datac, groupvars, N, everything())
+        resultsList[[measurevar[i]]] <- datac
+           
     }
     
     if (length(measurevar) == 1) {
@@ -81,14 +91,9 @@ se <- function (data = NULL, measurevar, groupvars = NULL, na.rm = TRUE, conf.in
 }
 
 #### examples ####
-# se(data = mtcars, measurevar = "disp", groupvars = c("cyl"))
-# se(data = mtcars, measurevar = c("mpg", "disp"), groupvars = c("cyl", "am"))
-# se(data = mtcars, measurevar = c("mpg", "disp"), groupvars = c("cyl", "vs"))
-# se(data = ChickWeight, measurevar = "weight", groupvars = "Diet")
-
-
-
-
+# se2(data = mtcars, measurevar = "disp", groupvars = c("cyl"))
+# se2(data = mtcars, measurevar = c("mpg", "disp"), groupvars = c("cyl", "am"))
+# se2(data = mtcars, measurevar = c("mpg", "disp"), groupvars = c("cyl", "vs"))
 
 
 
@@ -102,14 +107,15 @@ se <- function (data = NULL, measurevar, groupvars = NULL, na.rm = TRUE, conf.in
 ##   na.rm: a boolean that indicates whether to ignore NA's
 
 # norm data (this function will only be used by seWithin, and won't have to be called directly)
-normWithin <- function (data = NULL, idvar, measurevar, betweenvars = NULL, na.rm = TRUE) {
+normWithin2 <- function (data = NULL, idvar, measurevar, betweenvars = NULL, na.rm = TRUE) {
     
-    data <- tbl_dt(data)
+    data <- data.table(data)
     setkeyv(data, idvar) # sort by idvar
     
     data.subjMean <- data[, .(unlist(lapply(.SD, mean, na.rm = na.rm))), by = c(idvar, betweenvars), .SDcols = measurevar] # compute mean for each subject
     setnames(data.subjMean, c(idvar, betweenvars,'subjMean'))
     dataNew <- left_join(data, data.subjMean)
+    dataNew <- data.table(dataNew)
     setkeyv(dataNew, c(idvar, betweenvars)) # sort
     
     measureNormedVar <- paste0(measurevar, "Normed")
@@ -118,14 +124,13 @@ normWithin <- function (data = NULL, idvar, measurevar, betweenvars = NULL, na.r
     # dataNew[, measureNormedVar] <- dataNew[, measurevar] - unlist(data[, "subjMean"]) + mean(data[, measurevar], na.rm = na.rm)
     
     dataNew[, (measureNormedVar) := get(measurevar) - subjMean + mean(get(measurevar), na.rm = T)]
-    
     dataNew$subjMean <- NULL
     
     return(data.frame(dataNew))
 }
 
 #### examples ####
-# normWithin(data = sleep, idvar = "ID", measurevar = "extra", betweenvars = "group") %>% arrange(ID)
+# normWithin2(data = sleep, idvar = "ID", measurevar = "extra", betweenvars = "group") %>% arrange(ID)
 
 
 
@@ -151,10 +156,10 @@ normWithin <- function (data = NULL, idvar, measurevar, betweenvars = NULL, na.r
 #'    showNormed: whether to show the normed version of the outcome variable
 
 # within-subjects CI (normed and un-normed versions)
-seWithin <- function (data = NULL, measurevar, betweenvars = NULL, withinvars = NULL, idvar = NULL, na.rm = TRUE, conf.interval = 0.95, showNormed = FALSE) {
+seWithin2 <- function (data = NULL, measurevar, betweenvars = NULL, withinvars = NULL, idvar = NULL, na.rm = TRUE, conf.interval = 0.95, showNormed = FALSE) {
     
     data <- data.frame(data) # convert to data.frame
-    
+
     # Check if betweenvars and withinvars are factors
     factorvars <- sapply(data[, c(betweenvars, withinvars), drop = FALSE], 
                          FUN = is.factor)
@@ -166,7 +171,6 @@ seWithin <- function (data = NULL, measurevar, betweenvars = NULL, withinvars = 
         data[nonfactorvars] <- lapply(data[nonfactorvars], factor)
     }
     
-    
     resultsList <- list() # empty list to store results
     
     for (i in 1:length(measurevar)) {
@@ -176,42 +180,46 @@ seWithin <- function (data = NULL, measurevar, betweenvars = NULL, withinvars = 
             stop(paste0("\nInf or -Inf is in ", measurevar[i], " variable"))
         }
         
-        # Get the means from the un-normed data
-        datac <- se(data, measurevar[i], groupvars = c(betweenvars, withinvars), na.rm = na.rm, conf.interval = conf.interval, toNumeric = FALSE)
+        # Get the grand means from the un-normed data
+        datac <- se2(data, measurevar[i], groupvars = c(betweenvars, withinvars), na.rm = na.rm, conf.interval = conf.interval, toNumeric = FALSE)
         
         # Drop all the unused columns (these will be calculated with normed data)
+        datac$N <- NULL
         datac$sd <- NULL
         datac$se <- NULL
         datac$ci <- NULL
         
         # Norm each subject's data
-        ndata <- normWithin(data, idvar, measurevar[i], betweenvars, na.rm)
+        ndata <- normWithin2(data, idvar, measurevar[i], betweenvars, na.rm)
         
         # This is the name of the new column
         measurevar_n <- paste(measurevar[i], "Normed", sep = "")
         
+        if (is.null(betweenvars)) {
+            sampleSize <- length(unique(data[, idvar]))
+        } else if (!is.null(betweenvars)) {
+            sampleSize <- data.table(data)[, .N, by = c(betweenvars, idvar)][, .N, by = betweenvars]
+        }
+        
         # Collapse the normed data - now we can treat between and within vars the same
-        ndatac <- se(ndata, measurevar_n, groupvars = c(betweenvars, withinvars), na.rm = na.rm, conf.interval = conf.interval, toNumeric = FALSE)
+        ndatac <- se2(ndata, measurevar_n, groupvars = c(betweenvars, withinvars), na.rm = na.rm, conf.interval = conf.interval, toNumeric = FALSE, sampleSize = sampleSize)
         
         # Apply correction from Morey (2008) to the standard error and confidence interval
         # Get the product of the number of conditions of within-S variables
-        nWithinGroups <- prod(vapply(ndatac[,withinvars, drop = FALSE], FUN = function(x) length(levels(x)), FUN.VALUE = numeric(1)))
+        # nWithinGroups <- prod(vapply(ndatac[,withinvars, drop = FALSE], FUN = function(x) length(levels(x)), FUN.VALUE = numeric(1)))
+        nWithinGroups <- nrow(distinct(select(data, withinvars)))
         correctionFactor <- sqrt( nWithinGroups / (nWithinGroups-1) )
-        
-        ndatacTbl <- tbl_dt(ndatac)
-    
+        ndatacTbl <- data.table(ndatac)
         # Apply the correction factor
-        # setnames(ndatacTbl, c("sd", "se"), c("stdev", "stderror"))
-        # print(ndatacTbl)
-        ndatacTbl[, `:=` (sd = sd * correctionFactor, se = se * correctionFactor, ci = ci * correctionFactor)]
-        # print(ndatacTbl)
-        # setnames(ndatacTbl, c("stdev", "stderror"), c("sd", "se"))
-        
+        ndatacTbl$sd <- ndatacTbl$sd * correctionFactor
+        ndatacTbl$se <- ndatacTbl$se * correctionFactor
+        ndatacTbl$ci <- ndatacTbl$ci * correctionFactor
+
         # Combine the un-normed means with the normed results
         merged <- left_join(datac, ndatacTbl)
-        merged <- mutate_if(merged, is.factor, as.character) #if factor, convert to character
-        merged[order( unlist((merged[, 1])), decreasing =  F), ] #arrange by first column
-        merged <- tbl_dt(merged)
+        merged <- select(merged, c(betweenvars, withinvars), N, everything())
+        merged <- mutate_if(data.frame(merged), is.factor, as.character) #if factor, convert to character
+        merged <- data.table(merged)
         message("Factors have been converted to characters.")
         
         # convert columns to numeric class if possible, else, leave as character
@@ -232,27 +240,29 @@ seWithin <- function (data = NULL, measurevar, betweenvars = NULL, withinvars = 
             merged[, (measurevar_n) := NULL]
         } 
         
-        resultsList[[measurevar[i]]] <- data.table(merged)
+        merged <- arrange_(merged, c(betweenvars, withinvars)) # arrange by between then within variables
+        resultsList[[measurevar[i]]] <- merged
         message(cat("Confidence intervals: ", conf.interval, sep = ""))
         
     }
     
     if (length(measurevar) == 1) {
-        print(resultsList[[measurevar[1]]])
+        # print(resultsList[[measurevar[1]]])
         return(resultsList[[measurevar[1]]])
     } else {
-        print(resultsList)
+        # print(resultsList)
         return(resultsList)
     }
     
 }
 
 #### examples ####
-# seWithin(data = ChickWeight, measurevar = "weight", betweenvars = "Diet", withinvars = "Time", idvar = "Chick")
-# seWithin(data = ChickWeight, measurevar = "weight", betweenvars = "Diet", withinvars = "Time", idvar = "Chick", showNormed = TRUE)
+# seWithin2(data = ChickWeight, measurevar = "weight", betweenvars = "Diet", withinvars = "Time", idvar = "Chick", showNormed = T)
+# seWithin2(data = ChickWeight, measurevar = "weight", withinvars = "Time", idvar = "Chick")
+# seWithin2(data = ChickWeight, measurevar = "weight", betweenvars = "Diet", withinvars = "Time", idvar = "Chick", showNormed = TRUE)
 # library(ggplot2)
-# seWithin(data = diamonds, measurevar = c("carat"), betweenvars = "cut", withinvars = "color", idvar = "clarity")
-# a <- seWithin(data = diamonds, measurevar = c("carat", "depth", "z"), betweenvars = "cut", withinvars = "color", idvar = "clarity")
+# seWithin2(data = diamonds, measurevar = c("carat"), betweenvars = "cut", withinvars = "color", idvar = "clarity")
+# a <- seWithin2(data = diamonds, measurevar = c("carat", "depth", "z"), betweenvars = "cut", withinvars = "color", idvar = "clarity")
 # a$carat
 # a$depth
 # a$z
