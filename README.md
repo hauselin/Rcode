@@ -1,5 +1,7 @@
 # R helper functions
 
+Helper functions to make it easier to analyse and summarise data and results in R. Use at your own risk!
+
 - [Summarise statistical models plus effect sizes](#summarise-statistical-models-plus-effect-sizes)
 - [Convert between effect sizes](#convert-between-effect-sizes)
 - [Detect and remove outliers](#detect-and-remove-outliers)
@@ -42,6 +44,8 @@ es(r = c(0.1, 0.3, 0.5)) # r
 
 ## Detect and remove outliers
 We can identify and remove outliers in our data by identifying data points that are too extreme—either too many standard deviations (SD) away from the mean or too many median absolute deviations (MAD) away from the median. The SD approach might not be ideal with extreme outliers, whereas the MAD approach is much more robust (for comparison of both approaches, see Leys et al., 2013, Journal of Experimental Social Psychology).
+
+```detectOutliers``` script contains two functions: ```outliersZ``` and ```outliersMAD```
 
 ```
 source("https://raw.githubusercontent.com/hauselin/Rcode/master/detectOutliers.R") # load functions from my github site
