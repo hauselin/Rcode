@@ -1,6 +1,6 @@
 # R helper functions
 
-Helper functions to make it easier to analyse and summarise data and results in R. Use at your own risk!
+Helper functions to make it easier to analyse and summarise data and results in R. Use at your own risk!!!
 
 - [Summarise statistical models plus effect sizes](#summarise-statistical-models-plus-effect-sizes)
 - [Convert between effect sizes](#convert-between-effect-sizes)
