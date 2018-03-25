@@ -23,10 +23,10 @@ Example outputs
 * ```summaryh(cor.test(mtcars$mpg, mtcars$gear))```: r(30) = 0.48, p = .005
 * ```summaryh(t.test(mpg ~ vs, mtcars))```: t(23) = −4.67, p < .001, r = 0.70
 
-Arguments in ```summaryh(model, decimal = 3, showTable = F, showEffectSizesTable = F)```
+Arguments in ```summaryh(model, decimal = 2, showTable = F, showEffectSizesTable = F)```
 
 * model: fitted model (required)
-* decimal (default = 3): decimal places of output
+* decimal (default = 2): decimal places of output
 * showTable (default = F): show the results in table format
 * showEffectSizesTable (default = F): show other effect sizes computed using ```es``` function (see sections below) (d, r, R<sup>2</sup>, f, odds ratio, log odds ratio, area under curve)
 
