@@ -79,7 +79,7 @@ example <- c(1, 3, 3, 6, 8, 10, 10, 1000) # 1000 is an outlier
 outliersZ(example) # SD approach
 outliersMAD(example) # MAD approach
 
-# changing a few default values (note that if zCutOff is 3, 1000 ISN'T considered an outlier!!!)
+# changing a few default values (note that if zCutOff is 3, 1000 ISN'T considered an outlier!)
 outliersZ(x = example, zCutOff = 3, replaceOutliersWith = -999) # common to use 1.96, 2.5, 3 for Z cutoff
 outliersMAD(x = example, MADCutOff = 3, replaceOutliersWith = -888) # Leys et al. (2003) recommends 2.5 to 3 for MAD cutoff
 ```
