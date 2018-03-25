@@ -1,6 +1,6 @@
 # R helper functions
 
-Helper functions to make it easier to analyse and summarise data and results in R. Use at your own risk!!!
+Helper functions to make it easier to analyse and summarise data and results in R. Use at your own risk!!! If anything doesn't work or is wrong, let me know and I'll try to fix it as soon as possible (hauselin@gmail.com).
 
 - [Summarise statistical models plus effect sizes](#summarise-statistical-models-plus-effect-sizes)
 - [Convert between effect sizes](#convert-between-effect-sizes)
@@ -9,10 +9,29 @@ Helper functions to make it easier to analyse and summarise data and results in 
 
 ## Summarise statistical models plus effect sizes
 
-When fitting models, use ```summaryh()``` instead of ```summary()``` to get APA (American Psychological Association) formatted output that includes effect size estimates for each effect. The first time you ```source()``` the the functions, it might take some time because it will install a few R packages (e.g., dplyr). Subsequently, ```source()``` should load the functions much faster.
+When fitting models, use ```summaryh()``` instead of ```summary()``` to get APA (American Psychological Association) formatted output that also includes **effect size estimates for each effect** (*r* effect size).
+
+Currently accepts models fitted with these functions: ```lm```, ```anova```, ```aov```, ```chisq.test```, ```cor.test```, ```glm```, ```lmer```, ```lme```, ```t.test```.
+
+Example outputs
+
+* ```summaryh(lm(mpg ~ qsec, mtcars))```: b = 1.41, SE = 0.56, t(30) = 2.53, p = .017, r = 0.42
+* ```summaryh(aov(mpg ~ gear, mtcars))```: F(1, 30) = 9.00, p = .005, r = 0.48)
+* ```summaryh(cor.test(mtcars$mpg, mtcars$gear))```: r(30) = 0.48, p = .005
+* ```summaryh(t.test(mpg ~ vs, mtcars))```: t(23) = −4.67, p < .001, r = 0.70
+
+The first time you ```source()``` the the functions, it might take some time because it will install a few R packages (e.g., dplyr). Subsequently, ```source()``` should load the functions much faster.
+
+Arguments in ```summaryh(model, decimal = 3, showTable = F, showEffectSizesTable = F)```
+
+* model: fitted model (required)
+* decimal (default = 3): decimal places of output
+* showTable (default = F): show the results in table format
+* showEffectSizesTable (default = F): show other effect sizes computed using ```es``` function (see sections below) (d, r, R<sup>2</sup>, f, odds ratio, log odds ratio, area under curve)
 
 ```
-source("https://raw.githubusercontent.com/hauselin/Rcode/master/summaryh.R") # load functions from my github site
+# load functions from my github site
+source("https://raw.githubusercontent.com/hauselin/Rcode/master/summaryh.R")
 
 # linear regression
 summary(lm(mpg ~ cyl, mtcars)) # base R summary()
@@ -24,6 +43,9 @@ library(lme4); library(lmerTest) # load packages to fit mixed effects models
 model <- lmer(weight ~ Time * Diet  + (1 + Time | Chick), data = ChickWeight)
 summary(model)
 summaryh(model, decimal = 4, showTable = T, showEffectSizesTable = T) # optional arguments
+
+# ANOVA
+summaryh(aov(mpg ~ gear, mtcars))
 
 # correlation
 cor.test(mtcars$mpg, mtcars$cyl)
