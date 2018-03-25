@@ -94,11 +94,11 @@ When using the functions ```se``` (between-subjects) or ```seWithin``` (within-s
 # load functions from my github site
 source("https://raw.githubusercontent.com/hauselin/Rcode/master/se.R")
 
-# between-subjects
+# between-subjects standard error and confidence intervals (95% default)
 se(data = mtcars, measurevar = "disp", groupvars = "cyl")
 se(data = mtcars, measurevar = c("mpg", "disp"), groupvars = c("cyl", "am"))
 se(data = ChickWeight, measurevar = "weight", groupvars = "Diet")
 
-# within-subjects
+# within-subjects standard error and confidence intervals (95% default)
 seWithin(data = ChickWeight, measurevar = "weight", betweenvars = "Diet", withinvars = "Time", idvar = "Chick")
 ```
