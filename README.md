@@ -64,8 +64,8 @@ The ```es``` function converts one effect size into other effect sizes (e.g., d,
 # load functions from my github site
 source("https://raw.githubusercontent.com/hauselin/Rcode/master/es.R")
 
-es(d = 0.3) # Cohen's d
-es(r = c(0.1, 0.3, 0.5)) # r
+es(d = 0.3) # convert Cohen's d to other effect sizes
+es(r = c(0.1, 0.3, 0.5)) # convert multiple effect sizes (r) to other effect sizes
 ```
 
 ## Detect and remove outliers
