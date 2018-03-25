@@ -58,7 +58,8 @@ summaryh(cor.test(mtcars$mpg, mtcars$cyl), 3, T, T)
 The ```es``` function converts one effect size into other effect sizes (e.g., d, r, R<sup>2</sup>, f, odds ratio, log odds ratio, area-under-curve [AUC]). Note that AUC calculations may not be correct!
 
 ```
-source("https://raw.githubusercontent.com/hauselin/Rcode/master/es.R") # load functions from my github site
+# load functions from my github site
+source("https://raw.githubusercontent.com/hauselin/Rcode/master/es.R")
 
 es(d = 0.3) # Cohen's d
 es(r = c(0.1, 0.3, 0.5)) # r
@@ -70,7 +71,8 @@ We can identify and remove outliers in our data by identifying data points that 
 ```detectOutliers``` script contains two functions: ```outliersZ``` and ```outliersMAD```
 
 ```
-source("https://raw.githubusercontent.com/hauselin/Rcode/master/detectOutliers.R") # load functions from my github site
+# load functions from my github site
+source("https://raw.githubusercontent.com/hauselin/Rcode/master/detectOutliers.R")
 
 example <- c(1, 3, 3, 6, 8, 10, 10, 1000) # 1000 is an outlier
 outliersZ(example) # SD approach
@@ -88,7 +90,8 @@ Code adapted from <a href="http://www.cookbook-r.com/Graphs/Plotting_means_and_e
 When using the functions ```se``` (between-subjects) or ```seWithin``` (within-subjects), you can specify more than one outcome variable via the ```measurevar``` argument. If you specify more than one outcome variable, the output will be a list that has length of the number of outcome variables provided.
 
 ```
-source("https://raw.githubusercontent.com/hauselin/Rcode/master/se.R") # load functions from my github site
+# load functions from my github site
+source("https://raw.githubusercontent.com/hauselin/Rcode/master/se.R")
 
 # between-subjects
 se(data = mtcars, measurevar = "disp", groupvars = "cyl")
