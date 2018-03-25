@@ -13,14 +13,17 @@ When fitting models, use ```summaryh()``` instead of ```summary()``` to get APA 
 
 Currently accepts models fitted with these functions: ```lm```, ```anova```, ```aov```, ```chisq.test```, ```cor.test```, ```glm```, ```lmer```, ```lme```, ```t.test```.
 
+To use ```summaryh```, run this line of code: ```source("https://raw.githubusercontent.com/hauselin/Rcode/master/summaryh.R")``
+
+The first time you ```source()``` the the functions, it might take some time because it will install a few R packages (e.g., dplyr). Subsequently, ```source()``` should load the functions much faster.
+
+
 Example outputs
 
 * ```summaryh(lm(mpg ~ qsec, mtcars))```: b = 1.41, SE = 0.56, t(30) = 2.53, p = .017, r = 0.42
 * ```summaryh(aov(mpg ~ gear, mtcars))```: F(1, 30) = 9.00, p = .005, r = 0.48)
 * ```summaryh(cor.test(mtcars$mpg, mtcars$gear))```: r(30) = 0.48, p = .005
 * ```summaryh(t.test(mpg ~ vs, mtcars))```: t(23) = −4.67, p < .001, r = 0.70
-
-The first time you ```source()``` the the functions, it might take some time because it will install a few R packages (e.g., dplyr). Subsequently, ```source()``` should load the functions much faster.
 
 Arguments in ```summaryh(model, decimal = 3, showTable = F, showEffectSizesTable = F)```
 
