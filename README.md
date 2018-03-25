@@ -18,7 +18,7 @@ To use/download ```summaryh```, run this line of code: ```source("https://raw.gi
 Example outputs
 
 * ```summaryh(lm(mpg ~ qsec, mtcars))```: b = 1.41, SE = 0.56, t(30) = 2.53, p = .017, r = 0.42
-* ```summaryh(aov(mpg ~ gear, mtcars))```: F(1, 30) = 9.00, p = .005, r = 0.48)
+* ```summaryh(aov(mpg ~ gear, mtcars))```: F(1, 30) = 9.00, p = .005, r = 0.48
 * ```summaryh(cor.test(mtcars$mpg, mtcars$gear))```: r(30) = 0.48, p = .005
 * ```summaryh(t.test(mpg ~ vs, mtcars))```: t(23) = −4.67, p < .001, r = 0.70
 
