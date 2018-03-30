@@ -40,8 +40,8 @@ fit_ezddm <- function(data, reactiontime, accuracy, id = NULL, group = NULL) {
         ddmResults[, temporary_subject := NULL]
     }
     
-    setnames(ddmResults, c("v", "a", "Ter", "rt", "rtVar"), c("drift_v", "threshold_a", "ndt_Ter", "rt_acc1", "rtVar_acc1"))
     setDT(ddmResults) # ensure it's data table format
+    setnames(ddmResults, c("v", "a", "Ter", "rt", "rtVar"), c("drift_v", "threshold_a", "ndt_Ter", "rt_acc1", "rtVar_acc1"))
     return(ddmResults[])
 }
 
