@@ -11,9 +11,9 @@ rm(packages); rm(toInstall)
 fit_ezddm <- function(data, rtvar, accvar, idvar, groupvar) {
     
     ddmRt <- data[get(accvar) == 1, .(rt = mean(get(rtvar), na.rm = T), rtVar = var(get(rtvar), na.rm = T)), 
-                  by = mget(c(idvar, groupvar))]
+                  by = c(idvar, groupvar)]
     
-    ddmAcc <- data[, .(acc = mean(get(accvar), na.rm = T), n = .N), by = mget(c(idvar, groupvar))]
+    ddmAcc <- data[, .(acc = mean(get(accvar), na.rm = T), n = .N), by = c(idvar, groupvar)]
     ddmAcc[acc == 1, acc := edgeCorrect(n)]
     
     dataForDDM <- left_join(ddmRt, ddmAcc)
