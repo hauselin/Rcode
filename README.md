@@ -6,7 +6,7 @@ Helper functions to make it easier to analyse and summarise data and results in 
 - [Convert between effect sizes](#convert-between-effect-sizes)
 - [Detect and remove outliers](#detect-and-remove-outliers)
 - [Compute between- and within-subjects standard errors and confidence intervals](#compute-between--and-within-subjects-standard-errors-and-confidence-intervals)
-- [Fit Wagenmaker's EZ-diffusion model](#fit-ez-diffusion-model)
+- [Fit Wagenmaker's EZ-diffusion model for two-choice response-time tasks](#fit-ez-diffusion-model-for-two-choice-response-time-tasks)
 
 ## Summarise statistical models plus effect sizes
 
@@ -25,10 +25,10 @@ Example outputs
 
 Arguments in ```summaryh(model, decimal = 2, showTable = F, showEffectSizesTable = F)```
 
-* model: fitted model (required)
-* decimal (default = 2): decimal places of output
-* showTable (default = F): show the results in table format
-* showEffectSizesTable (default = F): show other effect sizes computed using ```es``` function (see sections below) (d, r, R<sup>2</sup>, f, odds ratio, log odds ratio, area under curve)
+* **model** (required): fitted model
+* **decimal** (default = 2): decimal places of output
+* **showTable** (default = F): show the results in table format
+* **showEffectSizesTable** (default = F): show other effect sizes computed using ```es``` function (see sections below) (d, r, R<sup>2</sup>, f, odds ratio, log odds ratio, area under curve)
 
 ```
 # load functions from my github site
@@ -103,19 +103,18 @@ se(data = ChickWeight, measurevar = "weight", groupvars = "Diet")
 seWithin(data = ChickWeight, measurevar = "weight", betweenvars = "Diet", withinvars = "Time", idvar = "Chick")
 ```
 
-## Fit EZ-diffusion model
-```fit_ezddm``` function fits [Wagenmaker et al.'s (2007)](https://link.springer.com/article/10.3758/BF03194023) EZ-diffusion model for two-choice response time tasks.
+## Fit EZ-diffusion model for two-choice response time tasks
+```fit_ezddm``` function fits [Wagenmaker et al.'s (2007)](https://link.springer.com/article/10.3758/BF03194023) EZ-diffusion model for two-choice response time tasks. To use the function, ensure your dataframe is in long form, has single-trial reaction time (in seconds) and accuracy (coded as 0 or 1) on each row. You can use the function to fit the EZ-diffusion model to just a single subject or multiple subjects, and separately for each experimental condition (see below for examples).
 
-To use/download ```fit_ezddm```, run this line of code: ```source("https://raw.githubusercontent.com/hauselin/Rcode/master/fit_ezddm.R")```. The first time you run this line of code, it will take some time because it's going to install a few useful R packages. Subsequently, it should load the functions much faster.
-
+To use/download ```fit_ezddm```, run this line of code: ```source("https://raw.githubusercontent.com/hauselin/Rcode/master/fit_ezddm.R")```. The first time you run this line of code, it will take some time because; subsequently, it should load the functions much faster.
 
 Arguments in ```fit_ezddm(data, reactiontime, accuracy, id = NULL, group = NULL)```
 
-* data (required): data with reaction time and accuracy variables (long form data expected)
-* reactiontime (required; in seconds): specify in characters the name of the reactiontime column
-* accuracy (required; coded as 0/1): specify in characters the name of the accuracy column
-* id (optional; default = NULL): specify in characters the name of your subject/id column (if not specified, assumes data belongs to single subject)
-* group (optional; default = NULL): specify in characters the name of your column(s) indicating various conditions
+* **data** (required): data with reaction time and accuracy variables (long form data expected)
+* **reactiontime** (required; in seconds): specify in characters the name of the reactiontime column
+* **accuracy** (required; coded as 0/1): specify in characters the name of the accuracy column
+* **id** (default = NULL): specify in characters the name of your subject/id column (if not specified, assumes data belongs to single subject)
+* **group** (default = NULL): specify in characters the name of your column(s) indicating various conditions
 
 ```
 # load functions from my github site
@@ -126,13 +125,13 @@ fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc")
 
 # single subject data (fit model to separate conditions/groups)
 fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", group = "condition1")
-fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", group = c("condition1", "condition2")
+fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", group = c("condition1", "condition2"))
 
 # multiple subject data
 fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", id = "subject")
 
 # multiple subject data (fit model to separate conditions/groups)
 fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", id = "subject", group = "condition1")
-fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", id = "subject", group = c("condition1", "condition2")
+fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", id = "subject", group = c("condition1", "condition2"))
 
 ```
