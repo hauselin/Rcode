@@ -6,7 +6,10 @@ Helper functions to make it easier to analyse and summarise data and results in 
 - [Convert between effect sizes](#convert-between-effect-sizes)
 - [Detect and remove outliers](#detect-and-remove-outliers)
 - [Compute between- and within-subjects standard errors and confidence intervals](#compute-between--and-within-subjects-standard-errors-and-confidence-intervals)
-- [Fit Wagenmaker's EZ-diffusion model](#fit-EZ--diffusion-model)
+- [Fit Wagenmaker's EZ-diffusion model](#fit-EZ-diffusion-model)
+
+
+
 
 ## Summarise statistical models plus effect sizes
 
