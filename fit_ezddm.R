@@ -8,29 +8,41 @@ if (length(toInstall)) {
 }
 rm(packages); rm(toInstall)
 
-fit_ezddm <- function(data, rt, acc, id, group) {
+fit_ezddm <- function(data, reactiontime, accuracy, id = NULL, group = NULL) {
     
-    message("Reaction times (rt) must be in seconds.\n
-        Accuracy or choice (acc) must be coded as 0 or 1.")
+    message("Reaction times must be in seconds.\nAccuracy or choice must be coded as 0 or 1.")
     
     setDT(data) # convert to data table
     
+    # if no id variable provided, assume it's just one subject's data
+    if (is.null(id)) {
+        id <- "temporary_subject"
+        data[, temporary_subject := 1] 
+        message("id variable not provided. Assuming single-subject data.")
+    }
+    
     # for accurate responses (coded as 1), calculate mean RT and RT variance for each subject, each condition
-    ddmRt <- data[get(acc) == 1, .(rt = mean(get(rt), na.rm = T), rtVar = var(get(rt), na.rm = T)), by = c(idvar, group)]
+    ddmRt <- data[get(accuracy) == 1, .(rt = mean(get(reactiontime), na.rm = T), rtVar = var(get(reactiontime), na.rm = T)), by = c(id, group)]
     
     # calculate accuracy for each subject, each condition
-    ddmAcc <- data[, .(acc = mean(get(acc), na.rm = T), n = .N), by = c(id, group)]
+    ddmAcc <- data[, .(acc = mean(get(accuracy), na.rm = T), n = .N), by = c(id, group)]
     ddmAcc[acc == 1, acc := edgeCorrect(n)] # edge correction
     
-    dataForDDM <- left_join(ddmRt, ddmAcc)
+    dataForDDM <- left_join(ddmRt, ddmAcc, by = c(id, group))
     
     # fit ez ddm model to each subject, each condition
-    ddmResults <- dataForDDM[, ezddm(propCorrect = acc, rtVar, rtCorrectMean_seconds = rt), by = c(id, group)]
+    ddmResults <- dataForDDM[, ezddm(propCorrect = acc, rtCorrectVariance_seconds = rtVar, rtCorrectMean_seconds = rt), by = c(id, group)]
     
-    ddmResults <- left_join(ddmResults, ddmRt) %>% left_join(ddmAcc)
+    ddmResults <- left_join(ddmResults, ddmRt, by = c(id, group)) %>% left_join(ddmAcc, by = c(id, group))
     
+    # remove temporary_subject variable
+    if (id == 'temporary_subject') {
+        ddmResults[, temporary_subject := NULL]
+    }
+    
+    setnames(ddmResults, c("v", "a", "Ter", "rt", "rtVar"), c("drift_v", "threshold_a", "ndt_Ter", "rt_acc1", "rtVar_acc1"))
     setDT(ddmResults) # ensure it's data table format
-    return(ddmResults)
+    return(ddmResults[])
 }
 
 ezddm <- function(propCorrect, rtCorrectVariance_seconds, rtCorrectMean_seconds) {
@@ -50,11 +62,11 @@ ezddm <- function(propCorrect, rtCorrectVariance_seconds, rtCorrectMean_seconds)
         Ter <- as.numeric(NA)
         
         if (propCorrect == 0) {
-            cat("Oops, propCorrect == 0!\n")
+            cat("Oops, propCorrect == 0\n")
         } else if (propCorrect == 0.5) {
-            cat("Oops, propCorrect == 0.5!\n")
+            cat("Oops, propCorrect == 0.5\n")
         } else if (propCorrect == 1) {
-            cat("Oops, propCorrect == 1!\n")
+            cat("Oops, propCorrect == 1\n")
         }
         
     } else {
