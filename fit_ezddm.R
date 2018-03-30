@@ -4,25 +4,32 @@ toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
 if (length(toInstall)) {
     install.packages(toInstall)
 } else {
-    library(dplyr); library(data.table); library(piecewiseSEM); library(compute.es); library(sjstats)
+    library(dplyr); library(data.table)
 }
 rm(packages); rm(toInstall)
 
-fit_ezddm <- function(data, rtvar, accvar, idvar, groupvar) {
+fit_ezddm <- function(data, rt, acc, id, group) {
     
-    ddmRt <- data[get(accvar) == 1, .(rt = mean(get(rtvar), na.rm = T), rtVar = var(get(rtvar), na.rm = T)), 
-                  by = c(idvar, groupvar)]
+    message("Reaction times (rt) must be in seconds.\n
+        Accuracy or choice (acc) must be coded as 0 or 1.")
     
-    ddmAcc <- data[, .(acc = mean(get(accvar), na.rm = T), n = .N), by = c(idvar, groupvar)]
-    ddmAcc[acc == 1, acc := edgeCorrect(n)]
+    setDT(data) # convert to data table
+    
+    # for accurate responses (coded as 1), calculate mean RT and RT variance for each subject, each condition
+    ddmRt <- data[get(acc) == 1, .(rt = mean(get(rt), na.rm = T), rtVar = var(get(rt), na.rm = T)), by = c(idvar, group)]
+    
+    # calculate accuracy for each subject, each condition
+    ddmAcc <- data[, .(acc = mean(get(acc), na.rm = T), n = .N), by = c(id, group)]
+    ddmAcc[acc == 1, acc := edgeCorrect(n)] # edge correction
     
     dataForDDM <- left_join(ddmRt, ddmAcc)
     
-    ddmResults <- dataForDDM[, ezddm(propCorrect = acc, rtVar, rtCorrectMean_seconds = rt), by = mget(c(idvar, groupvar))]
+    # fit ez ddm model to each subject, each condition
+    ddmResults <- dataForDDM[, ezddm(propCorrect = acc, rtVar, rtCorrectMean_seconds = rt), by = c(id, group)]
     
     ddmResults <- left_join(ddmResults, ddmRt) %>% left_join(ddmAcc)
     
-    setDT(ddmResults)
+    setDT(ddmResults) # ensure it's data table format
     return(ddmResults)
 }
 
