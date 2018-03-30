@@ -113,7 +113,7 @@ Arguments in ```fit_ezddm(data, reactiontime, accuracy, id = NULL, group = NULL)
 * **data** (required): data with reaction time and accuracy variables (long form data expected)
 * **reactiontime** (required; in seconds): specify in characters the name of the reactiontime column
 * **accuracy** (required; coded as 0/1): specify in characters the name of the accuracy column
-* **id** (default = NULL): specify in characters the name of your subject/id column (if not specified, assumes data belongs to single subject)
+* **id** (default = NULL): specify in characters the name of your subject/id column (if not specified, assumes data [all rows] belong to a single subject)
 * **group** (default = NULL): specify in characters the name of your column(s) indicating various conditions
 
 ```
@@ -127,11 +127,10 @@ fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc")
 fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", group = "condition1")
 fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", group = c("condition1", "condition2"))
 
-# multiple subject data
+# multiple subject data (id column is "subject"; i.e., df$subject in example below)
 fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", id = "subject")
 
 # multiple subject data (fit model to separate conditions/groups)
 fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", id = "subject", group = "condition1")
 fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", id = "subject", group = c("condition1", "condition2"))
-
 ```
