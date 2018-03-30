@@ -104,3 +104,35 @@ seWithin(data = ChickWeight, measurevar = "weight", betweenvars = "Diet", within
 ```
 
 ## Fit EZ-diffusion model
+```fit_ezddm``` function fits [Wagenmaker et al.'s (2007)](https://link.springer.com/article/10.3758/BF03194023) EZ-diffusion model for two-choice response time tasks.
+
+To use/download ```fit_ezddm```, run this line of code: ```source("https://raw.githubusercontent.com/hauselin/Rcode/master/fit_ezddm.R")```. The first time you run this line of code, it will take some time because it's going to install a few useful R packages. Subsequently, it should load the functions much faster.
+
+
+Arguments in ```fit_ezddm(data, reactiontime, accuracy, id = NULL, group = NULL)```
+
+* data (required): data with reaction time and accuracy variables (long form data expected)
+* reactiontime (required; in seconds): specify in characters the name of the reactiontime column
+* accuracy (required; coded as 0/1): specify in characters the name of the accuracy column
+* id (optional; default = NULL): specify in characters the name of your subject/id column (if not specified, assumes data belongs to single subject)
+* group (optional; default = NULL): specify in characters the name of your column(s) indicating various conditions
+
+```
+# load functions from my github site
+source("https://raw.githubusercontent.com/hauselin/Rcode/master/fit_ezddm.R")
+
+# single subject data
+fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc")
+
+# single subject data (fit model to separate conditions/groups)
+fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", group = "condition1")
+fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", group = c("condition1", "condition2")
+
+# multiple subject data
+fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", id = "subject")
+
+# multiple subject data (fit model to separate conditions/groups)
+fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", id = "subject", group = "condition1")
+fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", id = "subject", group = c("condition1", "condition2")
+
+```
