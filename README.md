@@ -6,6 +6,7 @@ Helper functions to make it easier to analyse and summarise data and results in 
 - [Convert between effect sizes](#convert-between-effect-sizes)
 - [Detect and remove outliers](#detect-and-remove-outliers)
 - [Compute between- and within-subjects standard errors and confidence intervals](#compute-between--and-within-subjects-standard-errors-and-confidence-intervals)
+- [Fit Wagenmaker's EZ-diffusion model](#fit-EZ--diffusion-model)
 
 ## Summarise statistical models plus effect sizes
 
@@ -101,3 +102,5 @@ se(data = ChickWeight, measurevar = "weight", groupvars = "Diet")
 # within-subjects standard error and confidence intervals (95% default)
 seWithin(data = ChickWeight, measurevar = "weight", betweenvars = "Diet", withinvars = "Time", idvar = "Chick")
 ```
+
+## Fit EZ-diffusion model
