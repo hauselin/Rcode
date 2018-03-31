@@ -28,13 +28,16 @@ fit_ezddm <- function(data, reactiontime, accuracy, id = NULL, group = NULL) {
     ddmAcc <- data[, .(acc = mean(get(accuracy), na.rm = T), n = .N), by = c(id, group)]
     
     if (sum(ddmAcc[, acc] %in% c(0, 0.5, 1)) > 0) {
-        message("Mean accuracies that are 0, 0.5, or 1 have been adjusted slightly for model fitting.")
+        n_corrected <- sum(ddmAcc[, acc] %in% c(0, 0.5, 1))
+        message(paste0("Mean accuracies (n = ", n_corrected, ") that are 0, 0.5, or 1 have been adjusted slightly for model fitting."))
+        ddmAcc[, acc_adjust := 0]
+        ddmAcc[acc %in% c(0, 0.5, 1), acc_adjust := 1]
     }
     
     # if acc is 1, apply edge correction
     ddmAcc[acc == 1, acc := edgeCorrect(n)] # edge correction
     # if acc is 0 or 50, add 0.001 to acc a bit so model fitting works
-    ddmAcc[acc %in% c(0, 0.5), acc := acc + 0.001]
+    ddmAcc[acc %in% c(0, 0.5), acc := acc + 0.0001]
     
     dataForDDM <- left_join(ddmRt, ddmAcc, by = c(id, group))
     
