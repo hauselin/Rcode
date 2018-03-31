@@ -27,8 +27,8 @@ fit_ezddm <- function(data, reactiontime, accuracy, id = NULL, group = NULL) {
     # calculate accuracy for each subject, each condition
     ddmAcc <- data[, .(acc = mean(get(accuracy), na.rm = T), n = .N), by = c(id, group)]
     
-    if (sum(ddmAcc[, get(accuracy)] %in% c(0, 0.5, 1)) > 0) {
-        message("Mean accuracies that are 0, 0.5, or 1 have been adjusted slighlty for model fitting.")
+    if (sum(ddmAcc[, acc] %in% c(0, 0.5, 1)) > 0) {
+        message("Mean accuracies that are 0, 0.5, or 1 have been adjusted slightly for model fitting.")
     }
     
     # if acc is 1, apply edge correction
