@@ -37,7 +37,7 @@ fit_ezddm <- function(data, reactiontime, accuracy, id = NULL, group = NULL) {
     # if acc is 1, apply edge correction
     ddmAcc[acc == 1, acc := edgeCorrect(n)] # edge correction
     # if acc is 0 or 50, add 0.001 to acc a bit so model fitting works
-    ddmAcc[acc %in% c(0, 0.5), acc := acc + 0.0001]
+    ddmAcc[acc %in% c(0, 0.5), acc := acc + 0.00001]
     
     dataForDDM <- left_join(ddmRt, ddmAcc, by = c(id, group))
     
@@ -56,32 +56,42 @@ fit_ezddm <- function(data, reactiontime, accuracy, id = NULL, group = NULL) {
     return(ddmResults[])
 }
 
-ezddm <- function(propCorrect, rtCorrectVariance_seconds, rtCorrectMean_seconds) {
+ezddm <- function(propCorrect, rtCorrectVariance_seconds, rtCorrectMean_seconds, nTrials = NULL) {
     
     #'  propCorrect: proportion correct (apply edge correction if necessary)
     #'  rtVariance: variance of correct reaction times (in seconds)
     #'  rtMean: mean of correct reaction times (in seconds)
+    #'  nTrials (optional): number of trials (useful for edge correction)
     
     s <- 0.1 # s is scaling parameter (defaults to 0.1 in Ratcliff's models)
     s2 <- s^2 # variance
     
+    v <- as.numeric(NA)
+    a <- as.numeric(NA)
+    Ter <- as.numeric(NA)
+    
     # if propCorrect equals 0, 0.5, or 1, this method will not work, and an edge correction is required
     if (propCorrect %in% c(0, 0.5, 1)) {
         
-        v <- as.numeric(NA)
-        a <- as.numeric(NA)
-        Ter <- as.numeric(NA)
-        
         if (propCorrect == 0) {
-            cat("Oops, propCorrect == 0\n")
+            cat("Oops, propCorrect == 0. Added 0.00001 to propCorrect.\n")
+            propCorrect <- propCorrect + 0.00001
         } else if (propCorrect == 0.5) {
-            cat("Oops, propCorrect == 0.5\n")
+            cat("Oops, propCorrect == 0.5. Added 0.00001 to propCorrect.\n")
+            propCorrect <- propCorrect + 0.00001
         } else if (propCorrect == 1) {
-            cat("Oops, propCorrect == 1\n")
+            if (!is.null(nTrials)) {
+                cat("Oops, propCorrect == 1. Applied edge correction.\n")
+                propCorrect <- 1 - (1 / (2 * nTrials))
+            } else {
+                cat("Oops, propCorrect == 1. Edge correction required. Provide number of trials (nTrials).\n")    
+            }
         }
         
-    } else {
-        
+    } 
+    
+    if (propCorrect != 1) {
+    
         L <- qlogis(propCorrect) # calculates logit
         x <- L * (L * propCorrect^2 - L * propCorrect + propCorrect - 0.5) / rtCorrectVariance_seconds
         v <- sign(propCorrect - 0.5) * s * x^(1/4) # drift rate
@@ -89,7 +99,7 @@ ezddm <- function(propCorrect, rtCorrectVariance_seconds, rtCorrectMean_seconds)
         y <- -v*a/s2
         MDT <- (a/(2*v)) * (1-exp(y))/(1 + exp(y))
         Ter <- rtCorrectMean_seconds - MDT # non-decision time
-        
+
     }
     
     return(data.frame(v, a, Ter))
@@ -97,10 +107,23 @@ ezddm <- function(propCorrect, rtCorrectVariance_seconds, rtCorrectMean_seconds)
 
 # test function
 # ezddm(.802, .112, .723)
+# ezddm(.5, .112, .723)
+# ezddm(.51, .112, .723)
+# ezddm(0, .112, .723)
+# ezddm(0.0001, .112, .723)
+# ezddm(0, .112, .723)
+# ezddm(0.005, .112, .723)
+# ezddm(0.005, .112, .723)
+# ezddm(1, .112, .723, 100)
+
 # ezddm(0.8881988, 0.1005484, 0.9010186)
 # library(EZ2)
 # Data2EZ(.802, .112, .723)
 # Data2EZ(0.8881988, 0.1005484, 0.9010186)
+# Data2EZ(0.1, 0.1005484, 0.9010186)
+# Data2EZ(0.00001, 0.1005484, 0.9010186)
+# ezddm(0.000001, 0.1005484, 0.9010186)
+# ezddm(0.00001, 0.1005484, 0.9010186)
 # data.frame(Data2EZ(.802, .112, .723))
 
 edgeCorrect <- function(n) {
