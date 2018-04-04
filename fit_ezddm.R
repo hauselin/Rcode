@@ -27,17 +27,17 @@ fit_ezddm <- function(data, reactiontime, accuracy, id = NULL, group = NULL) {
     # calculate accuracy for each subject, each condition
     ddmAcc <- data[, .(acc = mean(get(accuracy), na.rm = T), n = .N), by = c(id, group)]
     
-    if (sum(ddmAcc[, acc] %in% c(0, 0.5, 1)) > 0) {
-        n_corrected <- sum(ddmAcc[, acc] %in% c(0, 0.5, 1))
-        message(paste0("Mean accuracies (n = ", n_corrected, ") that are 0, 0.5, or 1 have been adjusted slightly for model fitting."))
+    if (sum(ddmAcc[, acc] %in% c(0.5, 1)) > 0) {
+        n_corrected <- sum(ddmAcc[, acc] %in% c(0.5, 1))
+        message(paste0("Mean accuracies (n = ", n_corrected, ") that are 0.5, or 1 have been adjusted slightly for model fitting."))
         ddmAcc[, acc_adjust := 0]
-        ddmAcc[acc %in% c(0, 0.5, 1), acc_adjust := 1]
+        ddmAcc[acc %in% c(0.5, 1), acc_adjust := 1]
     }
     
     # if acc is 1, apply edge correction
     ddmAcc[acc == 1, acc := edgeCorrect(n)] # edge correction
     # if acc is 0 or 50, add 0.001 to acc a bit so model fitting works
-    ddmAcc[acc %in% c(0, 0.5), acc := acc + 0.00001]
+    ddmAcc[acc %in% c(0.5), acc := acc + 0.00001]
     
     dataForDDM <- left_join(ddmRt, ddmAcc, by = c(id, group))
     
@@ -74,10 +74,9 @@ ezddm <- function(propCorrect, rtCorrectVariance_seconds, rtCorrectMean_seconds,
     if (propCorrect %in% c(0, 0.5, 1)) {
         
         if (propCorrect == 0) {
-            cat("Oops, propCorrect == 0. Added 0.00001 to propCorrect.\n")
-            propCorrect <- propCorrect + 0.00001
+            return(cat("Oops, propCorrect == 0. Can't fit model! D:"))
         } else if (propCorrect == 0.5) {
-            cat("Oops, propCorrect == 0.5. Added 0.00001 to propCorrect.\n")
+            cat("Oops, propCorrect == 0.5 (chance performance; drift will be close to 0). Added 0.00001 to propCorrect.\n")
             propCorrect <- propCorrect + 0.00001
         } else if (propCorrect == 1) {
             if (!is.null(nTrials)) {
@@ -119,12 +118,22 @@ ezddm <- function(propCorrect, rtCorrectVariance_seconds, rtCorrectMean_seconds,
 # ezddm(0.8881988, 0.1005484, 0.9010186)
 # library(EZ2)
 # Data2EZ(.802, .112, .723)
+# Data2EZ(.5, .112, .723)
 # Data2EZ(0.8881988, 0.1005484, 0.9010186)
 # Data2EZ(0.1, 0.1005484, 0.9010186)
 # Data2EZ(0.00001, 0.1005484, 0.9010186)
 # ezddm(0.000001, 0.1005484, 0.9010186)
 # ezddm(0.00001, 0.1005484, 0.9010186)
+# ezddm(0.5, 0.1005484, 0.9010186)
+# ezddm(0.51, 0.1005484, 0.9010186)
 # data.frame(Data2EZ(.802, .112, .723))
+
+# library(rtdists)
+# rt1 <- rdiffusion(200, a=0.2, v=0.02, t0=0.5, s=0.1); rt1$response <- ifelse(rt1$response == "upper", 1, 0)
+# rt1 <- rdiffusion(200, a=1, v=2, t0=0.5) # default s = 1
+# summary(rt1)
+# rt1$response <- rep(c(0, 1), each = 100)
+# fit_ezddm(data = rt1, reactiontime = "rt", accuracy = "response")
 
 edgeCorrect <- function(n) {
     #' n: number of observations
