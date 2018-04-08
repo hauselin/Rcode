@@ -181,7 +181,7 @@ reportAOV <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
     if (is.data.frame(esCohensf)) { # sometimes output is a dataframe, if so, extract cohens.f variable/column
         estimates$es.f <- esCohensf$cohens.f
     } else {
-        estimates$es.f <- cohens_f(model)    
+        estimates$es.f <- esCohensf
     }
     
     estimates$es.r <- es(f = estimates$es.f, msg = F, decimal = decimal)$r
