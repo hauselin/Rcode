@@ -177,8 +177,9 @@ reportAOV <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
     estimates <- estimates[estimates$term != "Residuals", ]
     
     # effect sizes
-    if (is.data.frame(cohens_f(model))) {
-        estimates$es.f <- cohens_f(model)$cohens.f
+    esCohensf <- cohens_f(model) # calculate Cohen's f
+    if (is.data.frame(esCohensf)) { # sometimes output is a dataframe, if so, extract cohens.f variable
+        estimates$es.f <- esCohensf$cohens.f
     } else {
         estimates$es.f <- cohens_f(model)    
     }
