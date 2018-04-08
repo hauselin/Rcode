@@ -10,7 +10,7 @@ rm(packages); rm(toInstall)
 
 fit_ezddm <- function(data, reactiontime, accuracy, id = NULL, group = NULL) {
     
-    message("Reaction times must be in seconds.\nAccuracy or choice must be coded as 0 or 1.")
+    message("Reaction times must be in seconds.\nAccuracy or choice must be coded as 0 (lower bound) or 1 (upper bound).")
     
     setDT(data) # convert to data table
     
@@ -104,6 +104,12 @@ ezddm <- function(propCorrect, rtCorrectVariance_seconds, rtCorrectMean_seconds,
     return(data.frame(v, a, Ter))
 }
 
+edgeCorrect <- function(n) {
+    #' n: number of observations
+    return(1 - (1 / (2 * n)))
+}
+
+
 # test function
 # ezddm(.802, .112, .723)
 # ezddm(.5, .112, .723)
@@ -135,7 +141,3 @@ ezddm <- function(propCorrect, rtCorrectVariance_seconds, rtCorrectMean_seconds,
 # rt1$response <- rep(c(0, 1), each = 100)
 # fit_ezddm(data = rt1, reactiontime = "rt", accuracy = "response")
 
-edgeCorrect <- function(n) {
-    #' n: number of observations
-    return(1 - (1 / (2 * n)))
-}

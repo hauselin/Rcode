@@ -177,7 +177,12 @@ reportAOV <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
     estimates <- estimates[estimates$term != "Residuals", ]
     
     # effect sizes
-    estimates$es.f <- cohens_f(model)
+    if (is.data.frame(cohens_f(model))) {
+        estimates$es.f <- cohens_f(model)$cohens.f
+    } else {
+        estimates$es.f <- cohens_f(model)    
+    }
+    
     estimates$es.r <- es(f = estimates$es.f, msg = F, decimal = decimal)$r
     
     # make a copy of estimates and convert to correct dp
