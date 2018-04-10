@@ -109,17 +109,16 @@ reportLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable
         formattedOutput <- gsub("-", replacement = "−", formattedOutput)
     }
     
-    formattedOutputDf <- data.frame(term = as.character(estimates$term), 
-                                    results = as.character(formattedOutput),
-                                    stringsAsFactors = FALSE)
+    formattedOutputDf <- data.table(term = as.character(estimates$term), 
+                                    results = as.character(formattedOutput))
     
     outputList <- list(results = formattedOutputDf)
     
     if (showTable) {
         
         # format table nicely
-        estimatesOutput <- apply(estimates[, -1], 2, round, decimal + 1)
-        estimatesOutput <- data.frame(term = as.character(estimates$term), estimatesOutput, stringsAsFactors = FALSE)
+        estimatesOutput <- data.frame(lapply(estimates[, -1], round, decimal + 1))
+        estimatesOutput <- data.table(term = as.character(estimates$term), estimatesOutput)
         outputList$results2 <- estimatesOutput
     }
     
@@ -127,9 +126,10 @@ reportLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable
         
         # get all other effect sizes
         effectSizes <- es(r = round(as.numeric(estimates$es.r), decimal + 1), decimal = decimal, msg = F)
-        outputList$effectSizes <- data.frame(term = as.character(estimates$term), effectSizes, stringsAsFactors = FALSE)
+        outputList$effectSizes <- data.table(term = as.character(estimates$term), effectSizes)
         
     }
+    
     options(scipen = 0) # enable scientific notation
     if (length(outputList) > 1) {
         return(outputList)
@@ -213,25 +213,24 @@ reportAOV <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
         formattedOutput <- gsub("-", replacement = "−", formattedOutput)
     }
     
-    formattedOutputDf <- data.frame(term = as.character(estimates$term), 
-                                    results = as.character(formattedOutput),
-                                    stringsAsFactors = FALSE)
+    formattedOutputDf <- data.table(term = as.character(estimates$term), 
+                                    results = as.character(formattedOutput))
     
     outputList <- list(results = formattedOutputDf)
     
     if (showTable) {
         
         # format table nicely
-        estimatesOutput <- apply(estimates[, -1], 2, round, decimal + 1)
-        estimatesOutput <- data.frame(term = as.character(estimates$term), estimatesOutput, stringsAsFactors = FALSE)
+        estimatesOutput <- data.frame(lapply(estimates[, -1], round, decimal + 1))
+        estimatesOutput <- data.table(term = as.character(estimates$term), estimatesOutput)
         outputList$results2 <- estimatesOutput
     }
     
     if (showEffectSizesTable) {
         
         # get all other effect sizes
-        effectSizes <- es(r = round(as.numeric(estimates$es.omega), decimal + 1), decimal = decimal, msg = F)
-        outputList$effectSizes <- data.frame(term = as.character(estimates$term), effectSizes, stringsAsFactors = FALSE)
+        effectSizes <- es(r = round(as.numeric(estimates$es.r), decimal + 1), decimal = decimal, msg = F)
+        outputList$effectSizes <- data.table(term = as.character(estimates$term), effectSizes)
         
     }
     options(scipen = 0) # enable scientific notation
@@ -293,15 +292,15 @@ reportCHISQ <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTa
         formattedOutput <- gsub("-", replacement = "−", formattedOutput)
     }
     
-    formattedOutputDf <- data.frame(results = as.character(formattedOutput), stringsAsFactors = FALSE)
+    formattedOutputDf <- data.table(results = as.character(formattedOutput))
     
     outputList <- list(results = formattedOutputDf)
     
     if (showTable) {
         
         # format table nicely
-        estimatesOutput <- apply(estimates, 2, round, decimal + 1)
-        estimatesOutput <- data.frame(term = as.character(model$data.name), as.list(estimatesOutput), stringsAsFactors = FALSE)
+        estimatesOutput <- data.frame(lapply(estimates, round, decimal + 1))
+        estimatesOutput <- data.table(term = as.character(model$data.name), estimatesOutput)
         outputList$results2 <- estimatesOutput
     }
     
@@ -309,7 +308,7 @@ reportCHISQ <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTa
         
         # get all other effect sizes
         effectSizes <- es(r = abs(round(as.numeric(estimates$es.r), decimal + 1)), decimal = decimal, msg = F)
-        outputList$effectSizes <- data.frame(term = as.character(model$data.name), as.list(effectSizes), stringsAsFactors = FALSE)
+        outputList$effectSizes <- data.table(term = as.character(model$data.name), effectSizes)
         
     }
     options(scipen = 0) # enable scientific notation
@@ -367,15 +366,16 @@ reportCortest <- function(model, decimal = 2, showTable = FALSE, showEffectSizes
         formattedOutput <- gsub("-", replacement = "−", formattedOutput)
     }
     
-    formattedOutputDf <- data.frame(results = as.character(formattedOutput), stringsAsFactors = FALSE)
+    formattedOutputDf <- data.table(results = as.character(formattedOutput))
     
     outputList <- list(results = formattedOutputDf)
     
     if (showTable) {
         
         # format table nicely
-        estimatesOutput <- apply(estimates, 2, round, decimal + 1)
-        estimatesOutput <- data.frame(term = as.character(model$data.name), as.list(estimatesOutput), stringsAsFactors = FALSE)
+        # estimatesOutput <- apply(estimates, 2, round, decimal + 1)
+        estimatesOutput <- data.frame(lapply(estimates, round, decimal + 1))
+        estimatesOutput <- data.table(term = as.character(model$data.name), estimatesOutput)
         outputList$results2 <- estimatesOutput
     }
     
@@ -383,7 +383,7 @@ reportCortest <- function(model, decimal = 2, showTable = FALSE, showEffectSizes
         
         # get all other effect sizes
         effectSizes <- es(r = abs(round(as.numeric(estimates$estimate), decimal + 1)), decimal = decimal, msg = F)
-        outputList$effectSizes <- data.frame(term = as.character(model$data.name), as.list(effectSizes), stringsAsFactors = FALSE)
+        outputList$effectSizes <- data.table(term = as.character(model$data.name), effectSizes)
         
     }
     options(scipen = 0) # enable scientific notation
@@ -451,15 +451,15 @@ reportCortestPearson <- function(model, decimal = 2, showTable = FALSE, showEffe
         formattedOutput <- gsub("-", replacement = "−", formattedOutput)
     }
     
-    formattedOutputDf <- data.frame(results = as.character(formattedOutput), stringsAsFactors = FALSE)
+    formattedOutputDf <- data.table(results = as.character(formattedOutput))
     
     outputList <- list(results = formattedOutputDf)
     
     if (showTable) {
         
         # format table nicely
-        estimatesOutput <- apply(estimates, 2, round, decimal + 1)
-        estimatesOutput <- data.frame(term = as.character(model$data.name), as.list(estimatesOutput), stringsAsFactors = FALSE)
+        estimatesOutput <- data.frame(lapply(estimates, round, decimal + 1))
+        estimatesOutput <- data.table(term = as.character(model$data.name), estimatesOutput)
         outputList$results2 <- estimatesOutput
     }
     
@@ -467,7 +467,7 @@ reportCortestPearson <- function(model, decimal = 2, showTable = FALSE, showEffe
         
         # get all other effect sizes
         effectSizes <- es(r = abs(round(as.numeric(estimates$estimate), decimal + 1)), decimal = decimal, msg = F)
-        outputList$effectSizes <- data.frame(term = as.character(model$data.name), as.list(effectSizes), stringsAsFactors = FALSE)
+        outputList$effectSizes <- data.table(term = as.character(model$data.name), effectSizes)
         
     }
     options(scipen = 0) # enable scientific notation
@@ -534,17 +534,16 @@ reportGLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
         formattedOutput <- gsub("-", replacement = "−", formattedOutput)
     }
     
-    formattedOutputDf <- data.frame(term = as.character(estimates$term), 
-                                    results = as.character(formattedOutput),
-                                    stringsAsFactors = FALSE)
+    formattedOutputDf <- data.table(term = as.character(estimates$term), 
+                                    results = as.character(formattedOutput))
     
     outputList <- list(results = formattedOutputDf)
     
     if (showTable) {
         
         # format table nicely
-        estimatesOutput <- apply(estimates[, -1], 2, round, decimal + 1)
-        estimatesOutput <- data.frame(term = as.character(estimates$term), estimatesOutput, stringsAsFactors = FALSE)
+        estimatesOutput <- data.frame(lapply(estimates[, -1], round, decimal + 1))
+        estimatesOutput <- data.table(term = as.character(estimates$term), estimatesOutput)
         outputList$results2 <- estimatesOutput
     }
     
@@ -552,7 +551,7 @@ reportGLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
         
         # get all other effect sizes
         effectSizes <- es(r = round(as.numeric(estimates$es.r), decimal + 1), decimal = decimal)
-        outputList$effectSizes <- data.frame(term = as.character(estimates$term), effectSizes, stringsAsFactors = FALSE)
+        outputList$effectSizes <- data.table(term = as.character(estimates$term), effectSizes)
         
     }
     options(scipen = 0) # enable scientific notation
@@ -578,6 +577,9 @@ reportMLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
     
     # example output: b = −2.88, SE = 0.32, t(30) = −8.92, p < .001, r = .85
     estimates <- data.frame(coef(summary(model))) # get estimates and put in dataframe
+    if (ncol(estimates) < 5 & (class(model)[1] == "merModLmerTest")) {
+        return(message("lmerTest failed to compute p values; use summary() to check; try refitting model with lme() from nlme package"))
+    }
     effectNames <- rownames(estimates) # get names of effects
     colnames(estimates) <- tolower(colnames(estimates))
     colnames(estimates) <- c('estimate', 'std.error', 'df', 'statistic', 'p.value') # rename columns
@@ -616,9 +618,8 @@ reportMLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
         formattedOutput <- gsub("-", replacement = "−", formattedOutput)
     }
     
-    formattedOutputDf <- data.frame(term = as.character(estimates$term), 
-                                    results = as.character(formattedOutput), 
-                                    stringsAsFactors = FALSE)
+    formattedOutputDf <- data.table(term = as.character(estimates$term), 
+                                    results = as.character(formattedOutput))
     
     outputList <- list(results = formattedOutputDf)
     
@@ -642,8 +643,9 @@ reportMLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
         estimates$es.R2conditional <- rsquareds$Conditional
         
         # format table nicely
-        estimatesOutput <- apply(estimates[, -1], 2, round, decimal + 1)
-        estimatesOutput <- data.frame(term = as.character(estimates$term), estimatesOutput, stringsAsFactors = FALSE)
+        estimatesOutput <- data.frame(lapply(estimates[, -1], round, decimal + 1))
+        estimatesOutput <- data.table(term = as.character(estimates$term), estimatesOutput)
+        
         outputList$results2 <- estimatesOutput
         
     }
@@ -652,7 +654,7 @@ reportMLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
         
         # get all other effect sizes
         effectSizes <- es(r = round(as.numeric(estimates$es.r), decimal + 1), decimal = decimal, msg = F)
-        outputList$effectSizes <- data.frame(term = as.character(estimates$term), effectSizes, stringsAsFactors = FALSE)
+        outputList$effectSizes <- data.frame(term = as.character(estimates$term), effectSizes)
         
     }
     options(scipen = 0) # enable scientific notation
@@ -715,15 +717,15 @@ reportTtest <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTa
         formattedOutput <- gsub("-", replacement = "−", formattedOutput)
     }
     
-    formattedOutputDf <- data.frame(results = as.character(formattedOutput), stringsAsFactors = FALSE)
+    formattedOutputDf <- data.table(results = as.character(formattedOutput))
     
     outputList <- list(results = formattedOutputDf)
     
     if (showTable) {
         
         # format table nicely
-        estimatesOutput <- apply(estimates, 2, round, decimal + 1)
-        estimatesOutput <- data.frame(term = as.character(model$data.name), as.list(estimatesOutput), stringsAsFactors = FALSE)
+        estimatesOutput <- data.frame(lapply(estimates, round, decimal + 1))
+        estimatesOutput <- data.table(term = as.character(model$data.name), estimatesOutput)
         outputList$results2 <- estimatesOutput
     }
     
@@ -731,7 +733,7 @@ reportTtest <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTa
         
         # get all other effect sizes
         effectSizes <- es(r = abs(round(as.numeric(estimates$es.r), decimal + 1)), decimal = decimal, msg = F)
-        outputList$effectSizes <- data.frame(term = as.character(model$data.name), as.list(effectSizes), stringsAsFactors = FALSE)
+        outputList$effectSizes <- data.table(term = as.character(model$data.name), effectSizes)
         
     }
     options(scipen = 0) # enable scientific notation
