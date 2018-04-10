@@ -22,6 +22,7 @@ Example outputs
 * ```summaryh(aov(mpg ~ gear, mtcars))```: F(1, 30) = 9.00, p = .005, r = 0.48
 * ```summaryh(cor.test(mtcars$mpg, mtcars$gear))```: r(30) = 0.48, p = .005
 * ```summaryh(t.test(mpg ~ vs, mtcars))```: t(23) = −4.67, p < .001, r = 0.70
+* ```summaryh(glm(vs ~ 1, mtcars, family = "binomial"))```: b = −0.25, SE = 0.36, z(31) = −0.71, p = .481, r = −0.07
 
 Arguments in ```summaryh(model, decimal = 2, showTable = F, showEffectSizesTable = F)```
 
