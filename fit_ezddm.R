@@ -1,3 +1,5 @@
+# fit_ezddm function fits Wagenmaker et al.'s (2007) EZ-diffusion model for two-choice response time tasks. To use the function, ensure your dataframe is in long form, has single-trial reaction time (in seconds) and accuracy (coded as 0 or 1) on each row. You can use the function to fit the EZ-diffusion model to just a single subject or multiple subjects, and separately for each experimental condition (see below for examples).
+
 # install really useful packages
 packages <- c("dplyr", "data.table")
 toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
@@ -10,7 +12,7 @@ rm(packages); rm(toInstall)
 
 fit_ezddm <- function(data, reactiontime, accuracy, id = NULL, group = NULL) {
     
-    message("Reaction times must be in seconds.\nAccuracy or choice must be coded as 0 (lower bound) or 1 (upper bound).")
+    message("Fits EZ-diffusion model (Wagenmaker et al., 2007, Psychonomic Bulletin & Review) .\nReaction times must be in seconds.\nAccuracy or choice must be coded as 0 (lower bound) or 1 (upper bound).")
     
     setDT(data) # convert to data table
     
