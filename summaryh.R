@@ -1,4 +1,4 @@
-# Last modified by Hause Lin 12-03-18 22:57 hauselin@gmail.com
+# Last modified by Hause Lin 12-04-18 08:44 hauselin@gmail.com
 
 # install really useful packages
 packages <- c("dplyr", "data.table", "piecewiseSEM", "compute.es", "sjstats")
@@ -16,20 +16,16 @@ cat("R2: .02 (small), .13 (medium), .26 (large) (Cohen, 1992)\n")
 
 summaryh <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable = FALSE) {
     options(scipen = 999) # disable scientific notation
-    if (class(model)[1] == 'lm') { # Last modified by Hause Lin 09-03-18 09:10 hauselin@gmail.com
+    if (class(model)[1] == 'lm') { 
         reportLM(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable) #
-    } else if (class(model)[1] %in% c("glm", "glmerMod")) { # Last modified by Hause Lin 09-03-18 09:10 hauselin@gmail.com
+    } else if (class(model)[1] %in% c("glm", "glmerMod")) { 
         reportGLM(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable) #
-    }  else if (class(model)[1] %in% c("lmerMod")) { # Last modified by Hause Lin 09-03-18 09:10 hauselin@gmail.com
+    }  else if (class(model)[1] %in% c("lmerMod")) { 
         message("Please install/load lmerTest package and then refit your model!")
-    } else if (class(model)[1] == "merModLmerTest") { # Last modified by Hause Lin 09-03-18 09:10 hauselin@gmail.com
+    } else if (class(model)[1] %in% c("merModLmerTest", "lme")) { 
         reportMLM(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable)
-    } else if (class(model)[1] == "aov") {
+    } else if (class(model)[1] %in% c("aov", "anova")) {
         reportAOV(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable)
-    } else if (class(model)[1] == "anova") {
-        reportAOV(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable)
-    } else if (class(model)[1] == "lme") {
-        reportMLM(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable)
     } else if (grepl("t-test", model$method, ignore.case = T)) {
         reportTtest(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable)
     } else if (grepl("Pearson's product-moment correlation", model$method, ignore.case = T)) {
@@ -41,7 +37,6 @@ summaryh <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable
     } else if (grepl("Pearson's Chi-squared test", model$method, ignore.case = T)) {
         reportCHISQ(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable)
     } else {
-        # modelClass <- class(model)[1]
         message(paste0("Class not supported yet! Contact Hause Lin: hause.lin@mail.utoronto.ca"))
     }
     # options(scipen = scientificNotationDefault) # set to default scientific notation settings

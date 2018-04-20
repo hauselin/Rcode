@@ -40,6 +40,7 @@ fit_ezddm <- function(data, reactiontime, accuracy, id = NULL, group = NULL) {
     ddmAcc[acc %in% c(0.5), acc := acc + 0.00001]
     
     dataForDDM <- left_join(ddmRt, ddmAcc, by = c(id, group))
+    setDT(dataForDDM)
     
     # fit ez ddm model to each subject, each condition
     ddmResults <- dataForDDM[, ezddm(propCorrect = acc, rtCorrectVariance_seconds = rtVar, rtCorrectMean_seconds = rt), by = c(id, group)]
@@ -135,9 +136,9 @@ edgeCorrect <- function(n) {
 # data.frame(Data2EZ(.802, .112, .723))
 
 # library(rtdists)
-# rt1 <- rdiffusion(200, a=0.2, v=0.02, t0=0.5, s=0.1); rt1$response <- ifelse(rt1$response == "upper", 1, 0)
-# rt1 <- rdiffusion(200, a=1, v=2, t0=0.5) # default s = 1
-# summary(rt1)
-# rt1$response <- rep(c(0, 1), each = 100)
-# fit_ezddm(data = rt1, reactiontime = "rt", accuracy = "response")
+rt1 <- rdiffusion(200, a=0.2, v=0.02, t0=0.5, s=0.1); rt1$response <- ifelse(rt1$response == "upper", 1, 0)
+rt1 <- rdiffusion(200, a=1, v=2, t0=0.5) # default s = 1
+summary(rt1)
+rt1$response <- rep(c(0, 1), each = 100)
+fit_ezddm(data = rt1, reactiontime = "rt", accuracy = "response")
 
