@@ -90,3 +90,4 @@ reportLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable
 # reportLM(model3, showTable = T, decimal = 3)
 # reportLM(model3, showTable = T, showEffectSizesTable = T, decimal = 3)
 # reportLM(model3, showTable = F, showEffectSizesTable = T, decimal = 2)
+# summaryh(model3)

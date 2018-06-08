@@ -22,7 +22,7 @@ summaryh <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable
         reportGLM(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable) #
     }  else if (class(model)[1] %in% c("lmerMod")) { 
         message("Please install/load lmerTest package and then refit your model!")
-    } else if (class(model)[1] %in% c("merModLmerTest", "lme")) { 
+    } else if (class(model)[1] %in% c("merModLmerTest", "lme", "lmerModLmerTest")) { 
         reportMLM(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable)
     } else if (class(model)[1] %in% c("aov", "anova")) {
         reportAOV(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable)
@@ -633,9 +633,9 @@ reportMLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
         }
         
         # piecewiseSEM (Nakagawa & Schielzeth, 2013)
-        rsquareds <- sem.model.fits(model)
-        estimates$es.R2marginal <- rsquareds$Marginal
-        estimates$es.R2conditional <- rsquareds$Conditional
+        # rsquareds <- sem.model.fits(model)
+        # estimates$es.R2marginal <- rsquareds$Marginal
+        # estimates$es.R2conditional <- rsquareds$Conditional
         
         # format table nicely
         estimatesOutput <- data.frame(lapply(estimates[, -1], round, decimal + 1))

@@ -119,7 +119,7 @@ Arguments in ```fit_ezddm(data, reactiontime, accuracy, id = NULL, group = NULL)
 
 Assumptions of EZ-diffusion model
 
-* Error and correct reaction-time distributions are identical (often violated!)
+* error and correct reaction-time distributions are identical (often violated!)
 * z = .5: starting point is equidistant from the response boundaries
 * sv = 0: across-trial variability in drift rate is negligible
 * sz = 0: across-trial variability in starting point is negligible

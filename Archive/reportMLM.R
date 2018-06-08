@@ -111,3 +111,7 @@ reportMLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
 # reportMLM(model3)
 # reportMLM(model1)
 # class(model3)[1]
+
+# summaryh(model1)
+# summaryh(model2)
+# summaryh(model3)
