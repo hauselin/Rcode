@@ -117,6 +117,14 @@ Arguments in ```fit_ezddm(data, reactiontime, accuracy, id = NULL, group = NULL)
 * **id** (default = NULL): specify in characters the name of your subject/id column (if not specified, assumes data [all rows] belong to a single subject)
 * **group** (default = NULL): specify in characters the name of your column(s) indicating various conditions
 
+Assumptions of EZ-diffusion model
+
+* Error and correct reaction-time distributions are identical (often violated!)
+* z = .5: starting point is equidistant from the response boundaries
+* sv = 0: across-trial variability in drift rate is negligible
+* sz = 0: across-trial variability in starting point is negligible
+* st = 0: across-trial range in nondecision time is negligible
+
 ```
 # load functions from my github site
 source("https://raw.githubusercontent.com/hauselin/Rcode/master/fit_ezddm.R")
