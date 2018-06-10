@@ -1,4 +1,4 @@
-# Last modified by Hause Lin 12-04-18 08:44 hauselin@gmail.com
+# Last modified by Hause Lin 10-06-18 5:04 PM hauselin@gmail.com
 
 # install really useful packages
 packages <- c("dplyr", "data.table", "piecewiseSEM", "compute.es", "sjstats")
