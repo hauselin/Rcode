@@ -23,8 +23,14 @@ fit_ezddm <- function(data, reactiontime, accuracy, id = NULL, group = NULL) {
         message("id variable not provided. Assuming single-subject data.")
     }
     
+    # get grouping variables
+    dataGroup <- data[, .(trials = .N), by = c(id, group)]
+    dataGroup[, trials := NULL]
+    
     # for accurate responses (coded as 1), calculate mean RT and RT variance for each subject, each condition
-    ddmRt <- data[get(accuracy) == 1, .(rt = mean(get(reactiontime), na.rm = T), rtVar = var(get(reactiontime), na.rm = T)), by = c(id, group)]
+    ddmRt <- data[get(accuracy) == 1, 
+                  .(rt = mean(get(reactiontime), na.rm = T), rtVar = var(get(reactiontime), na.rm = T)),
+                  by = c(id, group)]
     
     # calculate accuracy for each subject, each condition
     ddmAcc <- data[, .(acc = mean(get(accuracy), na.rm = T), n = .N), by = c(id, group)]
@@ -47,7 +53,9 @@ fit_ezddm <- function(data, reactiontime, accuracy, id = NULL, group = NULL) {
     # fit ez ddm model to each subject, each condition
     ddmResults <- dataForDDM[, ezddm(propCorrect = acc, rtCorrectVariance_seconds = rtVar, rtCorrectMean_seconds = rt), by = c(id, group)]
     
-    ddmResults <- left_join(ddmResults, ddmRt, by = c(id, group)) %>% left_join(ddmAcc, by = c(id, group))
+    ddmResults <- left_join(dataGroup, ddmResults, by = c(id, group)) %>% 
+        left_join(ddmRt, by = c(id, group)) %>%
+        left_join(ddmAcc, by = c(id, group))
     
     # remove temporary_subject variable
     if (id == 'temporary_subject') {
@@ -55,7 +63,7 @@ fit_ezddm <- function(data, reactiontime, accuracy, id = NULL, group = NULL) {
     }
     
     setDT(ddmResults) # ensure it's data table format
-    setnames(ddmResults, c("v", "a", "Ter", "rt", "rtVar"), c("drift_v", "threshold_a", "ndt_Ter", "rt_acc1", "rtVar_acc1"))
+    setnames(ddmResults, c("v", "a", "Ter", "rt", "rtVar"), c("v_drift", "a_threshold", "ndt_Ter", "rt_correct", "rtVar_correct"))
     return(ddmResults[])
 }
 
