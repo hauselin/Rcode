@@ -11,12 +11,9 @@
 # install packages if necessary
 packages <- c("dplyr", "data.table", "dtplyr")
 toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
-if (length(toInstall)) {
-    install.packages(toInstall)
-} else {
-    library(dplyr); library(data.table); library(dtplyr)
-}
+if (length(toInstall)) install.packages(toInstall)
 rm(packages); rm(toInstall)
+library(dplyr); library(data.table); library(dtplyr)
 
 se <- function (data = NULL, measurevar, groupvars = NULL, na.rm = TRUE, conf.interval = 0.95, toNumeric = TRUE) {
     

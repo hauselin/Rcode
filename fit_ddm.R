@@ -3,11 +3,9 @@ fit_ddm <- function(data, rt, response, startParams = c(a = 2, v = 0.1, t0 = 0.3
     # install packages
     packages <- c("rtdists", "ucminf")
     toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
-    if (length(toInstall)) {
-        install.packages(toInstall)
-    } else {
-        library(rtdists); library(ucminf)
-    }
+    if (length(toInstall)) install.packages(toInstall)
+    rm(packages); rm(toInstall) 
+    library(rtdists); library(ucminf)
     
     # if response coded as 0 or 1, recode as 'lower' and 'upper'
     data[data[, response] == 0, response] <- 'lower'
@@ -26,9 +24,9 @@ fit_ddm <- function(data, rt, response, startParams = c(a = 2, v = 0.1, t0 = 0.3
 }
 
 # #### test function
-# library(rtdists); library(ucminf)
+# source('https://raw.githubusercontent.com/hauselin/Rcode/master/fit_ddm.R') # function also on github
 # data <- rdiffusion(n = 300, a = 2, v = 0.3, t0 = 0.5, z = 0.3 * 2)
-# results_ddm <- fit_ddm(data = data, rt = 'rt', response = 'response')
+# results_ddm <- fit_ddm(data = data, rt = 'rt', response = 'response') # response argument accepts values coded as 0/1 or 'lower'/'upper'
 # results_ddm$par
 # 
 # # compare with fit_ezddm

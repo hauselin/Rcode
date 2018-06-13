@@ -27,11 +27,9 @@ cleanQuestionnaire <- function(data, subjectCol = 1, scaleName, scaleMin = 1, sc
     # install packages if necessary
     packages <- c("dplyr", "data.table", "dtplyr", "tidyr")
     toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
-    if (length(toInstall)) {
-        install.packages(toInstall)
-    } else {
-        library(tidyr); library(dplyr); library(data.table); library(dtplyr)
-    }
+    if (length(toInstall)) install.packages(toInstall)
+    library(tidyr); library(dplyr); library(data.table); library(dtplyr)
+    rm(packages); rm(toInstall)
     
     data <- tbl_dt(data) # data.table
     participantVariable <- colnames(data)[subjectCol] # name of participant variable

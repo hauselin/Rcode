@@ -3,12 +3,9 @@
 # install really useful packages
 packages <- c("dplyr", "data.table")
 toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
-if (length(toInstall)) {
-    install.packages(toInstall)
-} else {
-    library(dplyr); library(data.table)
-}
+if (length(toInstall)) install.packages(toInstall)
 rm(packages); rm(toInstall)
+library(dplyr); library(data.table)
 
 fit_ezddm <- function(data, reactiontime, accuracy, id = NULL, group = NULL) {
     
