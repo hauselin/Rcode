@@ -8,6 +8,10 @@ Helper functions to make it easier to analyse and summarise data and results in 
 - [Compute between- and within-subjects standard errors and confidence intervals](#compute-between--and-within-subjects-standard-errors-and-confidence-intervals)
 - [Fit Wagenmaker's EZ-diffusion model for two-choice response-time tasks](#fit-ez-diffusion-model-for-two-choice-response-time-tasks)
 
+
+
+[TOC]
+
 ## Summarise statistical models plus effect sizes
 
 When fitting models, use ```summaryh()``` instead of ```summary()``` to get APA (American Psychological Association) formatted output that also includes **effect size estimates for each effect** (*r* effect size).
@@ -107,39 +111,106 @@ seWithin(data = ChickWeight, measurevar = "weight", betweenvars = "Diet", within
 ## Fit EZ-diffusion model for two-choice response time tasks
 ```fit_ezddm``` function fits [Wagenmaker et al.'s (2007)](https://link.springer.com/article/10.3758/BF03194023) EZ-diffusion model for two-choice response time tasks. To use the function, ensure your dataframe is in long form, has single-trial reaction time (in seconds) and accuracy (coded as 0 or 1) on each row. You can use the function to fit the EZ-diffusion model to just a single subject or multiple subjects, and separately for each experimental condition (see below for examples).
 
+Assumptions of EZ-diffusion model
+
+- error and correct reaction-time distributions are identical (often violated!)
+- z = .5: starting point is equidistant from the response boundaries
+- sv = 0: inter-trial variability in drift rate is negligible
+- sz = 0: inter-trial variability in starting point is negligible
+- st = 0: inter-trial range in nondecision time is negligible
+
 To use/download ```fit_ezddm```, run this line of code: ```source("https://raw.githubusercontent.com/hauselin/Rcode/master/fit_ezddm.R")```. The first time you run this line of code, it will take some time because; subsequently, it should load the functions much faster.
 
-Arguments in ```fit_ezddm(data, reactiontime, accuracy, id = NULL, group = NULL)```
+Arguments in ```fit_ezddm(data, rts, responses, id = NULL, group = NULL)```
 
-* **data** (required): data with reaction time and accuracy variables (long form data expected)
-* **reactiontime** (required; in seconds): specify in characters the name of the reactiontime column
-* **accuracy** (required; coded as 0/1): specify in characters the name of the accuracy column
+* **data** (required): data object with reaction time and accuracy variables (long form data expected)
+* **rts** (required; in seconds): specify in characters the name of the reactiontime column
+* **responses** (required; coded as 0/1): specify in characters the name of the accuracy column
 * **id** (default = NULL): specify in characters the name of your subject/id column (if not specified, assumes data [all rows] belong to a single subject)
 * **group** (default = NULL): specify in characters the name of your column(s) indicating various conditions
 
-Assumptions of EZ-diffusion model
+Output (data.table class)
 
-* error and correct reaction-time distributions are identical (often violated!)
-* z = .5: starting point is equidistant from the response boundaries
-* sv = 0: across-trial variability in drift rate is negligible
-* sz = 0: across-trial variability in starting point is negligible
-* st = 0: across-trial range in nondecision time is negligible
+* subject: returns this variable only there's more than one subject
+* group/condition names: returns these variables only if you specify grouping variables
+* n: number of trials
+* a_threshold: boundary/threshold
+* v_drift: drift rate/evidence accumulation rate
+* ndt_Ter: non-decision time
+* rt_correct: mean reaction time for correct trials (used by ezddm to compute parameters)
+* rtVar_correct: reaction time variance for correct trials (used by ezddm to compute parameters)
+* acc: mean accuracy or proportion of upper bound (1) responses (used by ezddm to compute parameters)
 
-```
+```R
 # load functions from my github site
 source("https://raw.githubusercontent.com/hauselin/Rcode/master/fit_ezddm.R")
 
-# single subject data
-fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc")
+# simulate some data
+library(rtdists)
+data1 <- rdiffusion(n = 100, a = 2, v = 0.3, t0 = 0.5, z = 0.5 * 2) # simulate data
+data2 <- rdiffusion(n = 100, a = 2, v = -0.3, t0 = 0.5, z = 0.5 * 2) # simulate data
+dataAll <- rbind(data1, data2) # join data
+dataAll$response <- ifelse(dataAll$response == "upper", 1, 0) # convert responses to 1 and 0
+dataAll$subject <- rep(c(1, 2), each = 100) # assign subject id
+dataAll$cond1 <- sample(c("a", "b"), 200, replace = T) # randomly assign conditions a/b
+dataAll$cond2 <- sample(c("y", "z"), 200, replace = T) # randomly assign conditions y/z
 
-# single subject data (fit model to separate conditions/groups)
-fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", group = "condition1")
-fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", group = c("condition1", "condition2"))
+# fit model to just entire data set (assumes all data came from 1 subject)
+fit_ezddm(data = dataAll, rts = "rt", responses = "response")
+# fit model to each subject (no conditions)
+fit_ezddm(data = dataAll, rts = "rt", responses = "response", id = "subject") 
+# fit model to each subject by cond1
+fit_ezddm(data = dataAll, rts = "rt", responses = "response", id = "subject", group = "cond1") 
+# fit model to each subject by cond1,cond2
+fit_ezddm(data = dataAll, rts = "rt", responses = "response", id = "subject", group = c("cond1", "cond2"))
+```
 
-# multiple subject data (id column is "subject"; i.e., df$subject in example below)
-fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", id = "subject")
+## Fit drift-diffusion model for two-choice response time tasks using maximum likelihood estimation (parameters: a, v, t0, z)
 
-# multiple subject data (fit model to separate conditions/groups)
-fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", id = "subject", group = "condition1")
-fit_ezddm(data = df, reactiontime = "rt", accuracy = "acc", id = "subject", group = c("condition1", "condition2"))
+`fit_ddm` function fits four-parameter (a, v, t0, z) drift diffusion model (also known as Wiener diffusio model) to two-choice response time tasks using maximum likelihood estimation (R `ucminf` optimization). Assumes no or negligible inter-trial variability in drift rate (sv), starting point (sz), and non-decision time (st)—these parameters aren't not estimated by `fit_ddm`.
+
+To use/download ```fit_ddm```, run this line of code: ```source("https://raw.githubusercontent.com/hauselin/Rcode/master/fit_ddm.R")```. The first time you run this line of code, it will take some time because; subsequently, it should load the functions much faster.
+
+Arguments in ```fit_ddm(data, rts, responses, id = NULL, group = NULL)```
+
+- **data** (required): data object with reaction time and accuracy variables (long form data expected)
+- **rts** (required; in seconds): specify in characters the name of the reactiontime column
+- **responses** (required; coded as 0/1 or "lower"/"upper"): specify in characters the name of the accuracy column
+- **id** (default = NULL): specify in characters the name of your subject/id column (if not specified, assumes data [all rows] belong to a single subject)
+- **group** (default = NULL): specify in characters the name of your column(s) indicating various conditions
+- **startParams** (default = c(a = 2, v = 0.1, t0 = 0.3, z = 0.5)): starting parameters for likelihood estimation with `ucminf`
+
+Output (data.table class)
+
+- subject: returns this variable only there's more than one subject
+- group/condition names: returns these variables only if you specify grouping variables
+- n: number of trials
+- a: boundary/threshold
+- v: drift rate/evidence accumulation rate
+- t0: non-decision time
+- z: starting-point bias (0.5 is no bias)
+- convergence: reason for optimization termination (see `?ucminf`)
+- value: objective function value at computed miminizer (see `?ucminf`)
+
+```R
+# load functions from my github site
+source("https://raw.githubusercontent.com/hauselin/Rcode/master/fit_ddm.R")
+
+# simulate some data
+library(rtdists)
+data1 <- rdiffusion(n = 100, a = 2, v = 0.3, t0 = 0.5, z = 0.5 * 2) # simulate data
+data2 <- rdiffusion(n = 100, a = 2, v = -0.3, t0 = 0.5, z = 0.5 * 2) # simulate data
+dataAll <- rbind(data1, data2) # join data
+dataAll$subject <- rep(c(1, 2), each = 100) # assign subject id
+dataAll$cond1 <- sample(c("a", "b"), 200, replace = T) # randomly assign conditions a/b
+dataAll$cond2 <- sample(c("y", "z"), 200, replace = T) # randomly assign conditions y/z
+
+# fit model to just entire data set (assumes all data came from 1 subject)
+fit_ddm(data = dataAll, rts = "rt", responses = "response")
+# fit model to each subject (no conditions)
+fit_ddm(data = dataAll, rts = "rt", responses = "response", id = "subject") 
+# fit model to each subject by cond1
+fit_ddm(data = dataAll, rts = "rt", responses = "response", id = "subject", group = "cond1") 
+# fit model to each subject by cond1,cond2
+fit_ddm(data = dataAll, rts = "rt", responses = "response", id = "subject", group = c("cond1", "cond2"))
 ```
