@@ -8,10 +8,6 @@ Helper functions to make it easier to analyse and summarise data and results in 
 - [Compute between- and within-subjects standard errors and confidence intervals](#compute-between--and-within-subjects-standard-errors-and-confidence-intervals)
 - [Fit Wagenmaker's EZ-diffusion model for two-choice response-time tasks](#fit-ez-diffusion-model-for-two-choice-response-time-tasks)
 
-
-
-[TOC]
-
 ## Summarise statistical models plus effect sizes
 
 When fitting models, use ```summaryh()``` instead of ```summary()``` to get APA (American Psychological Association) formatted output that also includes **effect size estimates for each effect** (*r* effect size).
