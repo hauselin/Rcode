@@ -1,4 +1,4 @@
-# fit_ezddm function fits Wagenmaker et al.'s (2007) EZ-diffusion model for two-choice response time tasks. To use the function, ensure your dataframe is in long form, has single-trial reaction time (in seconds) and accuracy (coded as 0 or 1) on each row. You can use the function to fit the EZ-diffusion model to just a single subject or multiple subjects, and separately for each experimental condition (see below for examples).
+# fit_ezddm function fits Wagenmaker et al.'s (2007) EZ-diffusion model for two-choice response time tasks. To use the function, ensure your dataframe is in long form, has single-trial reaction time (in seconds) and responses (coded as 0 or 1) on each row. You can use the function to fit the EZ-diffusion model to just a single subject or multiple subjects, and separately for each experimental condition (see below for examples).
 
 # install really useful packages
 packages <- c("dplyr", "data.table")
@@ -7,17 +7,24 @@ if (length(toInstall)) install.packages(toInstall)
 rm(packages); rm(toInstall)
 library(dplyr); library(data.table)
 
-fit_ezddm <- function(data, reactiontime, accuracy, id = NULL, group = NULL) {
+fit_ezddm <- function(data, rts, responses, id = NULL, group = NULL) {
     
-    message("Fits EZ-diffusion model (Wagenmaker et al., 2007, Psychonomic Bulletin & Review) .\nReaction times must be in seconds.\nAccuracy or choice must be coded as 0 (lower bound) or 1 (upper bound).")
+    # message("Fits EZ-diffusion model (Wagenmaker et al., 2007, Psychonomic Bulletin & Review).\nResponses or choice must be coded as 0 (lower bound) or 1 (upper bound).")
     
     setDT(data) # convert to data table
+    
+    if (data[, mean(get(rts), na.rm = T)] > 10) {
+        message("Check if reaction time is in seconds, not milliseconds!")
+    }
+    
+    if (class(data[1, get(responses)]) %in% c('character', 'factor')) {
+        stop("Check if responses are coded as 0 (lower) and 1 (upper)!")
+    }
     
     # if no id variable provided, assume it's just one subject's data
     if (is.null(id)) {
         id <- "temporary_subject"
         data[, (id) := 1] 
-        message("id variable not provided. Assuming single-subject data.")
     }
     
     # get grouping variables
@@ -25,12 +32,12 @@ fit_ezddm <- function(data, reactiontime, accuracy, id = NULL, group = NULL) {
     dataGroup[, trials := NULL]
     
     # for accurate responses (coded as 1), calculate mean RT and RT variance for each subject, each condition
-    ddmRt <- data[get(accuracy) == 1, 
-                  .(rt = mean(get(reactiontime), na.rm = T), rtVar = var(get(reactiontime), na.rm = T)),
+    ddmRt <- data[get(responses) == 1, 
+                  .(rt = mean(get(rts), na.rm = T), rtVar = var(get(rts), na.rm = T)),
                   by = c(id, group)]
     
-    # calculate accuracy for each subject, each condition
-    ddmAcc <- data[, .(acc = mean(get(accuracy), na.rm = T), n = .N), by = c(id, group)]
+    # calculate responses for each subject, each condition
+    ddmAcc <- data[, .(acc = mean(get(responses), na.rm = T), n = .N), by = c(id, group)]
     
     if (sum(ddmAcc[, acc] %in% c(0.5, 1)) > 0) {
         n_corrected <- sum(ddmAcc[, acc] %in% c(0.5, 1))
@@ -54,13 +61,13 @@ fit_ezddm <- function(data, reactiontime, accuracy, id = NULL, group = NULL) {
         left_join(ddmRt, by = c(id, group)) %>%
         left_join(ddmAcc, by = c(id, group))
     
+    ddmResults <- select(ddmResults, id, group, n, everything()) # reorder columns
     # remove temporary_subject variable
     if (id == 'temporary_subject') {
         ddmResults$temporary_subject <- NULL
     }
-    
     setDT(ddmResults) # ensure it's data table format
-    setnames(ddmResults, c("v", "a", "Ter", "rt", "rtVar"), c("v_drift", "a_threshold", "ndt_Ter", "rt_correct", "rtVar_correct"))
+    setnames(ddmResults, c("a", "v", "Ter", "rt", "rtVar"), c("a_threshold", "v_drift", "ndt_Ter", "rt_correct", "rtVar_correct"))
     return(ddmResults[])
 }
 
@@ -109,7 +116,7 @@ ezddm <- function(propCorrect, rtCorrectVariance_seconds, rtCorrectMean_seconds,
 
     }
     
-    return(data.frame(v, a, Ter))
+    return(round(data.frame(a, v, Ter), 6))
 }
 
 edgeCorrect <- function(n) {
@@ -119,6 +126,29 @@ edgeCorrect <- function(n) {
 
 
 # test function
+# library(rtdists)
+# rt1 <- rdiffusion(200, a=3, v=2, t0=0.5)
+# rt1$response <- ifelse(rt1$response == "upper", 1, 0)
+# rt1$rt2 <- rt1$rt * 1000
+# fit_ezddm(data = rt1, rts = "rt", responses = "response")
+# fit_ezddm(data = rt1, rts = "rt2", responses = "response")
+
+
+data1 <- rdiffusion(n = 300, a = 2, v = 0.3, t0 = 0.5, z = 0.3 * 2) # simulate data
+data2 <- rdiffusion(n = 300, a = 2, v = -0.3, t0 = 0.5, z = 0.3 * 2) # simulate data
+setDT(data1) # convert to data.table
+setDT(data2)
+data1[, subject := 1] # add subject id
+data2[, subject := 2]
+dataAll <- rbind(data1, data2)
+dataAll[, cond1 := sample(c("a", "b"), 600, replace = T)] # randomly assign conditions a/b
+dataAll[, cond2 := sample(c("c", "d"), 600, replace = T)] # randomly assign conditions c/d
+dataAll$response <- ifelse(dataAll$response == "upper", 1, 0)
+fit_ezddm(data = dataAll, rts = "rt", responses = "response", id = "subject") # fit model to each subject (no conditions)
+fit_ezddm(data = dataAll, rts = "rt", responses = "response", id = "subject", group = "cond1") # fit model to each subject by cond1
+fit_ezddm(data = dataAll, rts = "rt", responses = "response", id = "subject", group = c("cond1", "cond2")) # fit model to each subject by cond1,cond2
+fit_ezddm(data = dataAll, rts = "rt", responses = "response") # fit model to just entire data set (1 subject, 1 condition) 
+
 # ezddm(.802, .112, .723)
 # ezddm(.5, .112, .723)
 # ezddm(.51, .112, .723)
@@ -128,7 +158,7 @@ edgeCorrect <- function(n) {
 # ezddm(0.005, .112, .723)
 # ezddm(0.005, .112, .723)
 # ezddm(1, .112, .723, 100)
-
+#
 # ezddm(0.8881988, 0.1005484, 0.9010186)
 # library(EZ2)
 # Data2EZ(.802, .112, .723)
@@ -141,11 +171,3 @@ edgeCorrect <- function(n) {
 # ezddm(0.5, 0.1005484, 0.9010186)
 # ezddm(0.51, 0.1005484, 0.9010186)
 # data.frame(Data2EZ(.802, .112, .723))
-
-# # library(rtdists)
-# rt1 <- rdiffusion(200, a=0.2, v=0.02, t0=0.5, s=0.1); rt1$response <- ifelse(rt1$response == "upper", 1, 0)
-# rt1 <- rdiffusion(200, a=1, v=2, t0=0.5) # default s = 1
-# summary(rt1)
-# rt1$response <- rep(c(0, 1), each = 100)
-# fit_ezddm(data = rt1, reactiontime = "rt", accuracy = "response")
-# 
