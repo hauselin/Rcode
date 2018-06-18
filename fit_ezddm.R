@@ -133,21 +133,20 @@ edgeCorrect <- function(n) {
 # fit_ezddm(data = rt1, rts = "rt", responses = "response")
 # fit_ezddm(data = rt1, rts = "rt2", responses = "response")
 
-
-data1 <- rdiffusion(n = 300, a = 2, v = 0.3, t0 = 0.5, z = 0.3 * 2) # simulate data
-data2 <- rdiffusion(n = 300, a = 2, v = -0.3, t0 = 0.5, z = 0.3 * 2) # simulate data
-setDT(data1) # convert to data.table
-setDT(data2)
-data1[, subject := 1] # add subject id
-data2[, subject := 2]
-dataAll <- rbind(data1, data2)
-dataAll[, cond1 := sample(c("a", "b"), 600, replace = T)] # randomly assign conditions a/b
-dataAll[, cond2 := sample(c("c", "d"), 600, replace = T)] # randomly assign conditions c/d
-dataAll$response <- ifelse(dataAll$response == "upper", 1, 0)
-fit_ezddm(data = dataAll, rts = "rt", responses = "response", id = "subject") # fit model to each subject (no conditions)
-fit_ezddm(data = dataAll, rts = "rt", responses = "response", id = "subject", group = "cond1") # fit model to each subject by cond1
-fit_ezddm(data = dataAll, rts = "rt", responses = "response", id = "subject", group = c("cond1", "cond2")) # fit model to each subject by cond1,cond2
-fit_ezddm(data = dataAll, rts = "rt", responses = "response") # fit model to just entire data set (1 subject, 1 condition) 
+# data1 <- rdiffusion(n = 300, a = 2, v = 0.3, t0 = 0.5, z = 0.3 * 2) # simulate data
+# data2 <- rdiffusion(n = 300, a = 2, v = -0.3, t0 = 0.5, z = 0.3 * 2) # simulate data
+# setDT(data1) # convert to data.table
+# setDT(data2)
+# data1[, subject := 1] # add subject id
+# data2[, subject := 2]
+# dataAll <- rbind(data1, data2)
+# dataAll[, cond1 := sample(c("a", "b"), 600, replace = T)] # randomly assign conditions a/b
+# dataAll[, cond2 := sample(c("c", "d"), 600, replace = T)] # randomly assign conditions c/d
+# dataAll$response <- ifelse(dataAll$response == "upper", 1, 0)
+# fit_ezddm(data = dataAll, rts = "rt", responses = "response", id = "subject") # fit model to each subject (no conditions)
+# fit_ezddm(data = dataAll, rts = "rt", responses = "response", id = "subject", group = "cond1") # fit model to each subject by cond1
+# fit_ezddm(data = dataAll, rts = "rt", responses = "response", id = "subject", group = c("cond1", "cond2")) # fit model to each subject by cond1,cond2
+# fit_ezddm(data = dataAll, rts = "rt", responses = "response") # fit model to just entire data set (1 subject, 1 condition) 
 
 # ezddm(.802, .112, .723)
 # ezddm(.5, .112, .723)
