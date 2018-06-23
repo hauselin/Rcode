@@ -7,6 +7,7 @@ Helper functions to make it easier to analyse and summarise data and results in 
 - [Detect and remove outliers](#detect-and-remove-outliers)
 - [Compute between- and within-subjects standard errors and confidence intervals](#compute-between--and-within-subjects-standard-errors-and-confidence-intervals)
 - [Fit Wagenmaker's EZ-diffusion model for two-choice response-time tasks](#fit-ez-diffusion-model-for-two-choice-response-time-tasks)
+- [Fit drift-diffusion model for two-choice response time tasks using maximum likelihood](https://github.com/hauselin/Rcode#fit-drift-diffusion-model-for-two-choice-response-time-tasks-using-maximum-likelihood-estimation-parameters-a-v-t0-z)
 
 ## Summarise statistical models plus effect sizes
 
@@ -31,7 +32,7 @@ Arguments in ```summaryh(model, decimal = 2, showTable = F, showEffectSizesTable
 * **showTable** (default = F): show the results in table format
 * **showEffectSizesTable** (default = F): show other effect sizes computed using ```es``` function (see sections below) (d, r, R<sup>2</sup>, f, odds ratio, log odds ratio, area under curve)
 
-```
+```R
 # load functions from my github site
 source("https://raw.githubusercontent.com/hauselin/Rcode/master/summaryh.R")
 
@@ -59,7 +60,7 @@ summaryh(cor.test(mtcars$mpg, mtcars$cyl), 3, T, T)
 
 The ```es``` function converts one effect size into other effect sizes (e.g., d, r, R<sup>2</sup>, f, odds ratio, log odds ratio, area-under-curve [AUC]). Note that AUC calculations may not be correct!
 
-```
+```R
 # load functions from my github site
 source("https://raw.githubusercontent.com/hauselin/Rcode/master/es.R")
 
@@ -72,7 +73,7 @@ We can identify and remove outliers in our data by identifying data points that 
 
 ```detectOutliers``` script contains two functions: ```outliersZ``` and ```outliersMAD```
 
-```
+```R
 # load functions from my github site
 source("https://raw.githubusercontent.com/hauselin/Rcode/master/detectOutliers.R")
 
@@ -91,7 +92,7 @@ Code adapted from <a href="http://www.cookbook-r.com/Graphs/Plotting_means_and_e
 
 When using the functions ```se``` (between-subjects) or ```seWithin``` (within-subjects), you can specify more than one outcome variable via the ```measurevar``` argument. If you specify more than one outcome variable, the output will be a list that has length of the number of outcome variables provided.
 
-```
+```R
 # load functions from my github site
 source("https://raw.githubusercontent.com/hauselin/Rcode/master/se.R")
 
