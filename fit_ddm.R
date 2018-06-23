@@ -20,8 +20,9 @@ fit_ddm <- function(data, rts, responses, id = NULL, group = NULL, startParams =
     
     # if response coded as 0 or 1, recode as 'lower' and 'upper'
     if (data[, unique(get(responses))][1] %in% c(0, 1)) {
-        data[, response := as.character(get(responses))]
-        data[, response := ifelse(get(responses) == "1", 'upper', 'lower')]
+        data[, response_char := as.character(get(responses))]
+        data[, response_char := ifelse(get(responses) == "1", 'upper', 'lower')]
+        responses <- "response_char"
     }
     
     # if no id variable provided, assume it's just one subject's data
@@ -74,6 +75,10 @@ fit_ddm <- function(data, rts, responses, id = NULL, group = NULL, startParams =
     if (id == 'temporary_subject') {
         resultsFinal$temporary_subject <- NULL
     }
+    
+    # found t0 and z
+    resultsFinal[, t0 := round(t0, 6)]
+    resultsFinal[, z := round(z, 6)]
     
     setDT(resultsFinal)
     return(resultsFinal[])

@@ -68,6 +68,12 @@ fit_ezddm <- function(data, rts, responses, id = NULL, group = NULL) {
     }
     setDT(ddmResults) # ensure it's data table format
     setnames(ddmResults, c("a", "v", "Ter", "rt", "rtVar"), c("a_threshold", "v_drift", "ndt_Ter", "rt_correct", "rtVar_correct"))
+    
+    # round results
+    ddmResults[, rt_correct := round(rt_correct, 3)]
+    ddmResults[, rtVar_correct := round(rtVar_correct, 3)]
+    ddmResults[, acc := round(acc, 3)]
+    
     return(ddmResults[])
 }
 
