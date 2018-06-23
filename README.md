@@ -137,6 +137,7 @@ Output (data.table class)
 * rt_correct: mean reaction time for correct trials (used by ezddm to compute parameters)
 * rtVar_correct: reaction time variance for correct trials (used by ezddm to compute parameters)
 * acc: mean accuracy or proportion of upper bound (1) responses (used by ezddm to compute parameters)
+* acc_adjust: indicates if mean accuracies (acc) have been adjusted; ezddm can't estimate parameters if mean accuracy is exactly 0.5 or 1.0; if acc_adjust is 0, no adjustments have been made; if acc_adjust is 1, minor adjustments have been made
 
 ```R
 # load functions from my github site
