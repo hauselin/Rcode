@@ -1,9 +1,9 @@
 # install packages
-packages <- c("rtdists", "ucminf", "data.table")
+packages <- c("rtdists", "ucminf", "data.table", "dplyr")
 toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
 if (length(toInstall)) install.packages(toInstall)
 rm(packages); rm(toInstall) 
-library(rtdists); library(ucminf); library(data.table)
+library(rtdists); library(ucminf); library(data.table); library(dplyr)
 
 fit_ddm <- function(data, rts, responses, id = NULL, group = NULL, startParams = c(a = 2, v = 0.1, t0 = 0.3, z = 0.5)) {
     
