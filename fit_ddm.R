@@ -76,7 +76,7 @@ fit_ddm <- function(data, rts, responses, id = NULL, group = NULL, startParams =
         resultsFinal$temporary_subject <- NULL
     }
     
-    # found t0 and z
+    # round t0 and z
     resultsFinal[, t0 := round(t0, 6)]
     resultsFinal[, z := round(z, 6)]
     
