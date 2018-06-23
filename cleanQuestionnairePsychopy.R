@@ -1,5 +1,13 @@
 # cleanQuestionnairePsychopy Function
 # Last modified by Hause Lin 24-10-17 6:19 PM
+
+# install packages if necessary
+packages <- c("tidyverse", "data.table", "dtplyr")
+toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
+if (length(toInstall)) install.packages(toInstall)
+library(tidyverse); library(data.table); library(dtplyr)
+rm(packages); rm(toInstall)
+
 cleanQuestionnairePsychopy <- function(data, subjectCol = 1, scaleName, scaleMin = 1, scaleMax = 7, subscales = list(), itemsToReverse = c(), checkReliability = TRUE) {
     
     message("Expecting long/tidy data with four columns in this order:\n1. participant number\n2. item number in scale\n3. subscale name\n4. rating\n")

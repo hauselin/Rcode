@@ -9,11 +9,11 @@
 #' Last modified by Hause Lin 10-03-18 21:25 hauselin@gmail.com
 
 # install packages if necessary
-packages <- c("dplyr", "data.table", "dtplyr")
+packages <- c("tidyverse", "data.table", "dtplyr")
 toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
 if (length(toInstall)) install.packages(toInstall)
 rm(packages); rm(toInstall)
-library(dplyr); library(data.table); library(dtplyr)
+library(tidyverse); library(data.table); library(dtplyr)
 
 se <- function (data = NULL, measurevar, groupvars = NULL, na.rm = TRUE, conf.interval = 0.95, toNumeric = TRUE) {
     

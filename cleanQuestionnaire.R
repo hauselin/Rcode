@@ -19,17 +19,17 @@
 # scales$bisbas <- cleanQuestionnaire(data = bisbas, scaleMin = 1, scaleMax = 4, form = 'wide', scaleName = 'bisbas', subscales = list(bis = c(1, 6, 10, 13, 15, 18, 20), basDrive = c(2, 7, 9, 17), basFun = c(4, 8, 12, 16), basReward = c(3, 5, 11, 14, 19)), itemsToReverse = c(2:17, 19:20), checkReliability = T)
 
 
+# install packages if necessary
+packages <- c("tidyverse", "data.table", "dtplyr")
+toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
+if (length(toInstall)) install.packages(toInstall)
+library(tidyverse); library(data.table); library(dtplyr)
+rm(packages); rm(toInstall)
+
 # cleanQuestionnaire Function
 cleanQuestionnaire <- function(data, subjectCol = 1, scaleName, scaleMin = 1, scaleMax = 7, subscales = list(), itemsToReverse = c(), checkReliability = TRUE) {
     
     message("Expecting wide data with columns in this order:\n1. participant number\n2, 3, 4... questions")
-    
-    # install packages if necessary
-    packages <- c("dplyr", "data.table", "dtplyr", "tidyr")
-    toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
-    if (length(toInstall)) install.packages(toInstall)
-    library(tidyr); library(dplyr); library(data.table); library(dtplyr)
-    rm(packages); rm(toInstall)
     
     data <- tbl_dt(data) # data.table
     participantVariable <- colnames(data)[subjectCol] # name of participant variable
