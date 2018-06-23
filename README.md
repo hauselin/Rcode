@@ -7,7 +7,7 @@ Helper functions to make it easier to analyse and summarise data and results in 
 - [Detect and remove outliers](#detect-and-remove-outliers)
 - [Compute between- and within-subjects standard errors and confidence intervals](#compute-between--and-within-subjects-standard-errors-and-confidence-intervals)
 - [Fit Wagenmaker's EZ-diffusion model for two-choice response-time tasks](#fit-ez-diffusion-model-for-two-choice-response-time-tasks)
-- [Fit drift-diffusion model for two-choice response time tasks using maximum likelihood](https://github.com/hauselin/Rcode#fit-drift-diffusion-model-for-two-choice-response-time-tasks-using-maximum-likelihood-estimation-parameters-a-v-t0-z)
+- [Fit drift-diffusion model for two-choice response time tasks using maximum likelihood (estimates a, v, t0, z)](https://github.com/hauselin/Rcode#fit-drift-diffusion-model-for-two-choice-response-time-tasks-using-maximum-likelihood-estimation-parameters-a-v-t0-z)
 
 ## Summarise statistical models plus effect sizes
 
