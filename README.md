@@ -17,20 +17,20 @@ Currently accepts models fitted with these functions: ```lm```, ```anova```, ```
 
 To use/download ```summaryh```, run this line of code: ```source("https://raw.githubusercontent.com/hauselin/Rcode/master/summaryh.R")```. The first time you run this line of code, it will take some time because it's going to install a few useful R packages. Subsequently, it should load the functions much faster.
 
-Example outputs
-
-* ```summaryh(lm(mpg ~ qsec, mtcars))```: b = 1.41, SE = 0.56, t(30) = 2.53, p = .017, r = 0.42
-* ```summaryh(aov(mpg ~ gear, mtcars))```: F(1, 30) = 9.00, p = .005, r = 0.48
-* ```summaryh(cor.test(mtcars$mpg, mtcars$gear))```: r(30) = 0.48, p = .005
-* ```summaryh(t.test(mpg ~ vs, mtcars))```: t(23) = −4.67, p < .001, r = 0.70
-* ```summaryh(glm(vs ~ 1, mtcars, family = "binomial"))```: b = −0.25, SE = 0.36, z(31) = −0.71, p = .481, r = −0.07
-
 Arguments in ```summaryh(model, decimal = 2, showTable = F, showEffectSizesTable = F)```
 
 * **model** (required): fitted model
 * **decimal** (default = 2): decimal places of output
 * **showTable** (default = F): show the results in table format
 * **showEffectSizesTable** (default = F): show other effect sizes computed using ```es``` function (see sections below) (d, r, R<sup>2</sup>, f, odds ratio, log odds ratio, area under curve)
+
+Example outputs (output is data.table class)
+
+- ```summaryh(lm(mpg ~ qsec, mtcars))```: b = 1.41, SE = 0.56, t(30) = 2.53, p = .017, r = 0.42
+- ```summaryh(aov(mpg ~ gear, mtcars))```: F(1, 30) = 9.00, p = .005, r = 0.48
+- ```summaryh(cor.test(mtcars$mpg, mtcars$gear))```: r(30) = 0.48, p = .005
+- ```summaryh(t.test(mpg ~ vs, mtcars))```: t(23) = −4.67, p < .001, r = 0.70
+- ```summaryh(glm(vs ~ 1, mtcars, family = "binomial"))```: b = −0.25, SE = 0.36, z(31) = −0.71, p = .481, r = −0.07
 
 ```R
 # load functions from my github site
@@ -39,7 +39,10 @@ source("https://raw.githubusercontent.com/hauselin/Rcode/master/summaryh.R")
 # linear regression
 model_lm <- lm(mpg ~ cyl, mtcars) 
 summary(model_lm) # base R summary()
-summaryh(model_lm) # returns APA-formatted output
+summaryh(model_lm) # returns APA-formatted output in a data.table (output below)
+##           term                                                 results
+## 1: (Intercept) b = 37.88, SE = 2.07, t(30) = 18.27, p < .001, r = 0.96
+## 2:         cyl b = −2.88, SE = 0.32, t(30) = −8.92, p < .001, r = 0.85 
 summaryh(model_lm, decimal = 5, showTable = T, showEffectSizesTable = T) # optional arguments
 
 # linear mixed effects regression
