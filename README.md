@@ -37,9 +37,10 @@ Arguments in ```summaryh(model, decimal = 2, showTable = F, showEffectSizesTable
 source("https://raw.githubusercontent.com/hauselin/Rcode/master/summaryh.R")
 
 # linear regression
-summary(lm(mpg ~ cyl, mtcars)) # base R summary()
-summaryh(lm(mpg ~ cyl, mtcars)) # returns APA-formatted output
-summaryh(lm(mpg ~ cyl, mtcars), decimal = 5, showTable = T, showEffectSizesTable = T) # optional arguments
+model_lm <- lm(mpg ~ cyl, mtcars) 
+summary(model_lm) # base R summary()
+summaryh(model_lm) # returns APA-formatted output
+summaryh(model_lm, decimal = 5, showTable = T, showEffectSizesTable = T) # optional arguments
 
 # linear mixed effects regression
 library(lme4); library(lmerTest) # load packages to fit mixed effects models
