@@ -21,7 +21,7 @@ Arguments in ```summaryh(model, decimal = 2, showTable = F, showEffectSizesTable
 
 * **model** (required): fitted model
 * **decimal** (default = 2): decimal places of output
-* **showTable** (default = F): show the results in table format
+* **showTable** (default = F): show results in table format
 * **showEffectSizesTable** (default = F): show other effect sizes computed using ```es``` function (see sections below) (d, r, R<sup>2</sup>, f, odds ratio, log odds ratio, area under curve)
 
 Example outputs (output is data.table class)
