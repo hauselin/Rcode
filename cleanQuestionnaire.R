@@ -10,7 +10,7 @@
 # scaleMin: scale minimum value (default = 1)
 # scaleMax: scale maximu value (default = 7)
 # subscales: provide subscale items in a list (see example below) (default = empty list/no subscales)
-# itemsToReverse: items to reverse-code (default = nothing)
+# itemsToReverse: items to reverse-code (default = nothing) 
 # checkReliability: check reliability alpha (default = TRUE)
 
 # WARNING: This function is still work in progress. If you input data is in long form, it might not work as intended!

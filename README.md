@@ -11,11 +11,11 @@ Helper functions to make it easier to analyse and summarise data and results in 
 
 ## Summarise statistical models plus effect sizes
 
-When fitting models, use ```summaryh()``` instead of ```summary()``` to get APA (American Psychological Association) formatted output that also includes **effect size estimates for each effect** (*r* effect size).
+When fitting models, use ```summaryh()``` in place of ```summary()``` to get APA (American Psychological Association) formatted output that also includes **effect size estimates for each effect** (*r* effect size).
 
-Currently accepts models fitted with these functions: ```lm```, ```anova```, ```aov```, ```chisq.test```, ```cor.test```, ```glm```, ```lmer```, ```lme```, ```t.test```. For ```lmer``` models, p-values must have been computed with ```lmerTest```.
+Currently accepts models fitted with these functions: ```lm```, ```anova```, ```aov```, ```chisq.test```, ```cor.test```, ```glm```, ```lmer```, `glmer`, ```lme```, ```t.test```. For ```lmer``` models, p-values must have been computed with ```lmerTest```.
 
-To use/download ```summaryh```, run this line of code: ```source("https://raw.githubusercontent.com/hauselin/Rcode/master/summaryh.R")```. The first time you run this line of code, it will take some time because it's going to install a few useful R packages. Subsequently, it should load the functions much faster.
+To use ```summaryh```, run this line of code each time you start a new R session: ```source("https://raw.githubusercontent.com/hauselin/Rcode/master/summaryh.R")```. The first time you run this line of code, it will take some time because it's going to install a few R packages. Subsequently, it should load the functions much faster.
 
 Arguments in ```summaryh(model, decimal = 2, showTable = F, showEffectSizesTable = F)```
 
