@@ -73,7 +73,7 @@ es(r = c(0.1, 0.3, 0.5)) # convert multiple effect sizes (r) to other effect siz
 ```
 
 ## Detect and remove outliers
-We can identify and remove outliers in our data by identifying data points that are too extreme—either too many standard deviations (SD) away from the mean or too many median absolute deviations (MAD) away from the median. The SD approach might not be ideal with extreme outliers, whereas the MAD approach is much more robust (for comparison of both approaches, see [Leys et al., 2013, Journal of Experimental Social Psychology](https://s3.amazonaws.com/academia.edu.documents/32918779/Leys_MAD_final_copy.pdf?AWSAccessKeyId=AKIAIWOWYYGZ2Y53UL3A&Expires=1522001231&Signature=RL2IhDQKFM8W9z32xELWJE%2BGWBM%3D&response-content-disposition=inline%3B%20filename%3DDetecting_outliers_Do_not_use_standard_d.pdf)).
+We can identify and remove outliers in our data by identifying data points that are too extreme—either too many standard deviations (SD) away from the mean or too many median absolute deviations (MAD) away from the median. The SD approach might not be ideal with extreme outliers, whereas the MAD approach is much more robust (for comparison of both approaches, see [Leys et al., 2013, Journal of Experimental Social Psychology](<https://doi.org/10.1016/j.jesp.2013.03.013>)).
 
 ```detectOutliers``` script contains two functions: ```outliersZ``` and ```outliersMAD```
 
