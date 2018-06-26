@@ -13,7 +13,7 @@ Helper functions to make it easier to analyse and summarise data and results in 
 
 When fitting models, use ```summaryh()``` in place of ```summary()``` to get APA (American Psychological Association) formatted output that also includes **effect size estimates for each effect** (*r* effect size). 
 
-Currently accepts models fitted with these functions: ```lm```, ```anova```, ```aov```, ```chisq.test```, ```cor.test```, ```glm```, ```lmer```, `glmer`, ```lme```, ```t.test```. For ```lmer``` models, p-values must have been computed with ```lmerTest```.
+Currently accepts models fitted with these functions: ```lm```, ```anova```, ```aov```, ```chisq.test```, ```cor.test```, ```glm```, ```lmer```, `glmer`, ```lme```, ```t.test```. For ```lmer``` models, p-values must have been computed with ```lmerTest```. Feel free to modify the functions for other models or other formatting styles. Or let me know if you want the function to work with other model types.
 
 To use ```summaryh```, run this line of code each time you start a new R session: ```source("https://raw.githubusercontent.com/hauselin/Rcode/master/summaryh.R")```. The first time you run this line of code, it will take some time because it's going to install a few R packages. Subsequently, it should load the functions much faster.
 
