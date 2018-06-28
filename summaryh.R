@@ -1,5 +1,3 @@
-# Last modified by Hause Lin 10-06-18 5:07 PM hauselin@gmail.com
-
 # install really useful packages
 packages <- c("tidyverse", "data.table", "piecewiseSEM", "compute.es", "sjstats")
 toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
@@ -7,8 +5,8 @@ if (length(toInstall)) install.packages(toInstall)
 rm(packages); rm(toInstall)
 library(tidyverse); library(data.table); library(piecewiseSEM); library(compute.es); library(sjstats)
 
-cat("r: .10 (small), .30 (medium), .50 (large) (Cohen, 1992)\n")
 cat("d: 0.20 (small), 0.50 (medium), .80 (large) (Cohen, 1992)\n")
+cat("r: .10 (small), .30 (medium), .50 (large) (Cohen, 1992)\n")
 cat("R2: .02 (small), .13 (medium), .26 (large) (Cohen, 1992)\n")
 
 summaryh <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable = FALSE) {
@@ -19,7 +17,7 @@ summaryh <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable
         reportGLM(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable) #
     }  else if (class(model)[1] %in% c("lmerMod")) { 
         message("Please install/load lmerTest package and then refit your model!")
-    } else if (class(model)[1] %in% c("merModLmerTest", "lme", "lmerModLmerTest")) { 
+    } else if (class(model)[1] %in% c("merModLmerTest", "lme", "lmerModLmerTest", "lmerTest")) { 
         reportMLM(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable)
     } else if (class(model)[1] %in% c("aov", "anova")) {
         reportAOV(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable)
@@ -79,6 +77,7 @@ reportLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable
     estimatesRound[abs(estimatesCopy) >= 0.01] <- round(estimatesRound[abs(estimatesCopy) >= 0.01], decimal)
     estimatesRound[abs(estimatesCopy) >= 0.01] <- sprintf(digits, estimatesCopy[abs(estimatesCopy) >= 0.01])
     estimatesRound[abs(estimatesCopy) < 0.01] <- signif(estimatesCopy[abs(estimatesCopy) < 0.01], digits = 1)
+    estimatesRound[abs(estimatesCopy) < 0.0000001] <- 0
     # estimatesRound[abs(estimatesCopy) < 0.01] <- sprintf(pdigits, estimatesCopy[abs(estimatesCopy) < 0.01])
     
     # fix p values
@@ -184,6 +183,7 @@ reportAOV <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
     estimatesRound[abs(estimatesCopy) >= 0.01] <- round(estimatesRound[abs(estimatesCopy) >= 0.01], decimal)
     estimatesRound[abs(estimatesCopy) >= 0.01] <- sprintf(digits, estimatesCopy[abs(estimatesCopy) >= 0.01])
     estimatesRound[abs(estimatesCopy) < 0.01] <- signif(estimatesCopy[abs(estimatesCopy) < 0.01], digits = 1)
+    estimatesRound[abs(estimatesCopy) < 0.0000001] <- 0
     # estimatesRound[abs(estimatesCopy) < 0.01] <- sprintf(pdigits, estimatesCopy[abs(estimatesCopy) < 0.01])
     
     # fix p values
@@ -264,6 +264,7 @@ reportCHISQ <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTa
     estimatesRound[abs(estimatesCopy) >= 0.01] <- round(estimatesRound[abs(estimatesCopy) >= 0.01], decimal)
     estimatesRound[abs(estimatesCopy) >= 0.01] <- sprintf(digits, estimatesCopy[abs(estimatesCopy) >= 0.01])
     estimatesRound[abs(estimatesCopy) < 0.01] <- signif(estimatesCopy[abs(estimatesCopy) < 0.01], digits = 1)
+    estimatesRound[abs(estimatesCopy) < 0.0000001] <- 0
     # estimatesRound[abs(estimatesCopy) < 0.01] <- sprintf(pdigits, estimatesCopy[abs(estimatesCopy) < 0.01])
     
     # fix p values
@@ -343,6 +344,7 @@ reportCortest <- function(model, decimal = 2, showTable = FALSE, showEffectSizes
     estimatesRound[abs(estimatesCopy) >= 0.01] <- round(estimatesRound[abs(estimatesCopy) >= 0.01], decimal)
     estimatesRound[abs(estimatesCopy) >= 0.01] <- sprintf(digits, estimatesCopy[abs(estimatesCopy) >= 0.01])
     estimatesRound[abs(estimatesCopy) < 0.01] <- signif(estimatesCopy[abs(estimatesCopy) < 0.01], digits = 1)
+    estimatesRound[abs(estimatesCopy) < 0.0000001] <- 0
     # estimatesRound[abs(estimatesCopy) < 0.01] <- sprintf(pdigits, estimatesCopy[abs(estimatesCopy) < 0.01])
     
     # fix p values
@@ -424,6 +426,7 @@ reportCortestPearson <- function(model, decimal = 2, showTable = FALSE, showEffe
     estimatesRound[abs(estimatesCopy) >= 0.01] <- round(estimatesRound[abs(estimatesCopy) >= 0.01], decimal)
     estimatesRound[abs(estimatesCopy) >= 0.01] <- sprintf(digits, estimatesCopy[abs(estimatesCopy) >= 0.01])
     estimatesRound[abs(estimatesCopy) < 0.01] <- signif(estimatesCopy[abs(estimatesCopy) < 0.01], digits = 1)
+    estimatesRound[abs(estimatesCopy) < 0.0000001] <- 0
     # estimatesRound[abs(estimatesCopy) < 0.01] <- sprintf(pdigits, estimatesCopy[abs(estimatesCopy) < 0.01])
     
     # fix p values
@@ -504,6 +507,7 @@ reportGLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
     estimatesRound[abs(estimatesCopy) >= 0.01] <- round(estimatesRound[abs(estimatesCopy) >= 0.01], decimal)
     estimatesRound[abs(estimatesCopy) >= 0.01] <- sprintf(digits, estimatesCopy[abs(estimatesCopy) >= 0.01])
     estimatesRound[abs(estimatesCopy) < 0.01] <- signif(estimatesCopy[abs(estimatesCopy) < 0.01], digits = 1)
+    estimatesRound[abs(estimatesCopy) < 0.0000001] <- 0
     # estimatesRound[abs(estimatesCopy) < 0.01] <- sprintf(pdigits, estimatesCopy[abs(estimatesCopy) < 0.01])
     
     # fix p values
@@ -588,6 +592,7 @@ reportMLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
     estimatesRound[abs(estimatesCopy) >= 0.01] <- round(estimatesRound[abs(estimatesCopy) >= 0.01], decimal)
     estimatesRound[abs(estimatesCopy) >= 0.01] <- sprintf(digits, estimatesCopy[abs(estimatesCopy) >= 0.01])
     estimatesRound[abs(estimatesCopy) < 0.01] <- signif(estimatesCopy[abs(estimatesCopy) < 0.01], digits = 1)
+    estimatesRound[abs(estimatesCopy) < 0.0000001] <- 0
     # estimatesRound[abs(estimatesCopy) < 0.01] <- sprintf(pdigits, estimatesCopy[abs(estimatesCopy) < 0.01])
     
     # fix p values
@@ -689,6 +694,7 @@ reportTtest <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTa
     estimatesRound[abs(estimatesCopy) >= 0.01] <- round(estimatesRound[abs(estimatesCopy) >= 0.01], decimal)
     estimatesRound[abs(estimatesCopy) >= 0.01] <- sprintf(digits, estimatesCopy[abs(estimatesCopy) >= 0.01])
     estimatesRound[abs(estimatesCopy) < 0.01] <- signif(estimatesCopy[abs(estimatesCopy) < 0.01], digits = 1)
+    estimatesRound[abs(estimatesCopy) < 0.0000001] <- 0
     # estimatesRound[abs(estimatesCopy) < 0.01] <- sprintf(pdigits, estimatesCopy[abs(estimatesCopy) < 0.01])
     
     # fix p values
