@@ -77,10 +77,10 @@ fit_ddm <- function(data, rts, responses, id = NULL, group = NULL, startParams =
     }
     
     # round t0 and z
+    setDT(resultsFinal)
     resultsFinal[, t0 := round(t0, 6)]
     resultsFinal[, z := round(z, 6)]
     
-    setDT(resultsFinal)
     return(resultsFinal[])
 }
 
