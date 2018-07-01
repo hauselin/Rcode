@@ -8,7 +8,7 @@ Helper functions to make it easier to analyse and summarise data and results in 
 - [Compute between- and within-subjects standard errors and confidence intervals](#compute-between--and-within-subjects-standard-errors-and-confidence-intervals)
 - [Fit Wagenmaker's EZ-diffusion model for two-choice response-time tasks](#fit-ez-diffusion-model-for-two-choice-response-time-tasks)
 - [Fit drift-diffusion model for two-choice response time tasks using maximum likelihood (estimates a, v, t0, z)](https://github.com/hauselin/Rcode#fit-drift-diffusion-model-for-two-choice-response-time-tasks-using-maximum-likelihood-estimation-parameters-a-v-t0-z)
-- [Fit full drift-diffusion model for two-choice response time tasks using maximum likelihood (estimates a, v, t0, z, st0, sz, sv)](https://github.com/hauselin/Rcode#fit-drift-diffusion-model-for-two-choice-response-time-tasks-using-maximum-likelihood-estimation-parameters-a-v-t0-z)
+- [Fit full drift-diffusion model for two-choice response time tasks using maximum likelihood (estimates a, v, t0, z, st0, sz, sv)](https://github.com/hauselin/Rcode#fit-full-drift-diffusion-model-for-two-choice-response-time-tasks-using-maximum-likelihood-estimation-parameters-a-v-t0-z-st0-sz-sv)
 
 ## Summarise statistical models plus effect sizes
 
