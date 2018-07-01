@@ -130,7 +130,7 @@ Arguments in ```fit_ezddm(data, rts, responses, id = NULL, group = NULL)```
 * **responses** (required; coded as 0/1): specify in characters the name of the accuracy column
 * **id** (default = NULL): specify in characters the name of your subject/id column (if not specified, assumes data [all rows] belong to a single subject)
 * **group** (default = NULL): specify in characters the name of your column(s) indicating various conditions
-* **simCheck** (default = TRUE): simulate data (n = 1000) with estimated parameters (using `rdiffusion`)
+* **simCheck** (default = TRUE): simulate data (n = 1000) with estimated parameters (using `rdiffusion`) to check model fit
 * **decimal** (default = 4): round parameter estimates
 
 Output (tibble and data.table class)
@@ -192,7 +192,7 @@ Arguments in ```fit_ddm(data, rts, responses, id = NULL, group = NULL)```
 - **id** (default = NULL): specify in characters the name of your subject/id column (if not specified, assumes data [all rows] belong to a single subject)
 - **group** (default = NULL): specify in characters the name of your column(s) indicating various conditions
 - **startParams** (default = c(a = 2, v = 0.1, t0 = 0.3, z = 0.5)): starting parameters for likelihood estimation with `ucminf`
-- **simCheck** (default = TRUE): simulate data (n = 1000) with estimated parameters (using `rdiffusion`)
+- **simCheck** (default = TRUE): simulate data (n = 1000) with estimated parameters (using `rdiffusion`) to check model fit
 - **decimal** (default = 4): round parameter estimates
 
 Output (tibble and data.table class)
