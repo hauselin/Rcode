@@ -197,27 +197,25 @@ Arguments in ```fit_ddm(data, rts, responses, id = NULL, group = NULL)```
 
 Output (tibble and data.table class)
 
-- subject: returns this variable only there's more than one subject
-- group/condition names: returns these variables only if you specify grouping variables
-
-- n: total number of trials
-- n0: number of lower bound trials (response = 0 or 'lower')
-- n1: number of upper bound trials (response = 1 or 'upper')
-
-- a: boundary/threshold
-- v: drift rate/evidence accumulation rate
-- t0: non-decision time
-- z: starting-point bias (0.5 is no bias)
-- convergence: reason for optimization termination (see ?ucminf)
-- value: objective function value at computed miminizer (see ?ucminf)
-- response: proportion of upper bound (1) responses
-- responseSim: simulated proportion of upper bound responses (based on parameter estimates)
-- rtOverall: reaction time for upper and lower-bound trials
-- rtOverallSim: simulated reaction time for upper and lower trials
-- rt0: reaction time for lower-bound trials
-- rt0Sim: simulated reaction time for lower-bound trials
-- rt1: reaction time for upper-bound trials
-- rt1Sim: simulated reaction time for upper-bound trials
+* subject: returns this variable only there's more than one subject
+* group/condition names: returns these variables only if you specify grouping variables
+* n: total number of trials
+* n0: number of lower bound trials (response = 0 or 'lower')
+* n1: number of upper bound trials (response = 1 or 'upper')
+* a: boundary/threshold
+* v: drift rate/evidence accumulation rate
+* t0: non-decision time
+* z: starting-point bias (0.5 is no bias)
+* convergence: reason for optimization termination (see ?ucminf)
+* value: objective function value at computed miminizer (see ?ucminf)
+* response: proportion of upper bound (1) responses
+* responseSim: simulated proportion of upper bound responses (based on parameter estimates)
+* rtOverall: reaction time for upper and lower-bound trials
+* rtOverallSim: simulated reaction time for upper and lower trials
+* rt0: reaction time for lower-bound trials
+* rt0Sim: simulated reaction time for lower-bound trials
+* rt1: reaction time for upper-bound trials
+* rt1Sim: simulated reaction time for upper-bound trials
 
 ```R
 # load functions from my github site
