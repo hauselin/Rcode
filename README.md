@@ -208,8 +208,8 @@ Output (tibble and data.table class)
 - v: drift rate/evidence accumulation rate
 - t0: non-decision time
 - z: starting-point bias (0.5 is no bias)
-- convergence: reason for optimization termination (see `?ucminf`)
-- value: objective function value at computed miminizer (see `?ucminf`)
+- convergence: reason for optimization termination (see ?ucminf)
+- value: objective function value at computed miminizer (see ?ucminf)
 - response: proportion of upper bound (1) responses
 - responseSim: simulated proportion of upper bound responses (based on parameter estimates)
 - rtOverall: reaction time for upper and lower-bound trials
