@@ -8,6 +8,7 @@ Helper functions to make it easier to analyse and summarise data and results in 
 - [Compute between- and within-subjects standard errors and confidence intervals](#compute-between--and-within-subjects-standard-errors-and-confidence-intervals)
 - [Fit Wagenmaker's EZ-diffusion model for two-choice response-time tasks](#fit-ez-diffusion-model-for-two-choice-response-time-tasks)
 - [Fit drift-diffusion model for two-choice response time tasks using maximum likelihood (estimates a, v, t0, z)](https://github.com/hauselin/Rcode#fit-drift-diffusion-model-for-two-choice-response-time-tasks-using-maximum-likelihood-estimation-parameters-a-v-t0-z)
+- [Fit full drift-diffusion model for two-choice response time tasks using maximum likelihood (estimates a, v, t0, z, st0, sz, sv)](https://github.com/hauselin/Rcode#fit-drift-diffusion-model-for-two-choice-response-time-tasks-using-maximum-likelihood-estimation-parameters-a-v-t0-z)
 
 ## Summarise statistical models plus effect sizes
 
@@ -129,19 +130,29 @@ Arguments in ```fit_ezddm(data, rts, responses, id = NULL, group = NULL)```
 * **responses** (required; coded as 0/1): specify in characters the name of the accuracy column
 * **id** (default = NULL): specify in characters the name of your subject/id column (if not specified, assumes data [all rows] belong to a single subject)
 * **group** (default = NULL): specify in characters the name of your column(s) indicating various conditions
+* **simCheck** (default = TRUE): simulate data (n = 1000) with estimated parameters (using `rdiffusion`)
+* **decimal** (default = 4): round parameter estimates
 
-Output (data.table class)
+Output (tibble and data.table class)
 
 * subject: returns this variable only there's more than one subject
 * group/condition names: returns these variables only if you specify grouping variables
-* n: number of trials
-* a_threshold: boundary/threshold
-* v_drift: drift rate/evidence accumulation rate
-* ndt_Ter: non-decision time
-* rt_correct: mean reaction time for correct trials (used by ezddm to compute parameters)
-* rtVar_correct: reaction time variance for correct trials (used by ezddm to compute parameters)
-* acc: mean accuracy or proportion of upper bound (1) responses (used by ezddm to compute parameters)
-* acc_adjust: indicates if mean accuracies (acc) have been adjusted; ezddm can't estimate parameters if mean accuracy is exactly 0.5 or 1.0; if acc_adjust is 0, no adjustments have been made; if acc_adjust is 1, minor adjustments have been made
+* n: total number of trials
+* n0: number of lower bound trials (response = 0 or 'lower')
+* n1: number of upper bound trials (response = 1 or 'upper')
+* a: threshold/boundary
+* v: drift rate/evidence accumulation rate
+* t0_Ter: non-decision time
+* rt1Var: reaction time variance for upper-bound/correct trials (used by ezddm to compute parameters)
+* response: proportion of upper bound (1) responses
+* responseSim: simulated proportion of upper bound responses (based on parameter estimates)
+* rtOverall: reaction time for upper and lower-bound trials
+* rtOverallSim: simulated reaction time for upper and lower trials
+* rt0: reaction time for lower-bound trials
+* rt0Sim: simulated reaction time for lower-bound trials
+* rt1: reaction time for upper-bound trials
+* rt1Sim: simulated reaction time for upper-bound trials
+* accAdjust: indicates if mean accuracies (acc) have been adjusted; ezddm can't estimate parameters if mean accuracy is exactly 0.5 or 1.0; if acc_adjust is 0, no adjustments have been made; if acc_adjust is 1, minor adjustments have been made
 
 ```R
 # load functions from my github site
@@ -169,7 +180,7 @@ fit_ezddm(data = dataAll, rts = "rt", responses = "response", id = "subject", gr
 
 ## Fit drift-diffusion model for two-choice response time tasks using maximum likelihood estimation (parameters: a, v, t0, z)
 
-`fit_ddm` function fits four-parameter (a, v, t0, z) drift diffusion model (also known as Wiener diffusio model) to two-choice response time tasks using maximum likelihood estimation (R `ucminf` optimization). Assumes no or negligible inter-trial variability in drift rate (sv), starting point (sz), and non-decision time (st)—these parameters aren't not estimated by `fit_ddm`.
+`fit_ddm` function fits four-parameter (a, v, t0, z) drift diffusion model (also known as Wiener diffusion model) to two-choice response time tasks using maximum likelihood estimation (R `ucminf` optimization). Assumes no or negligible inter-trial variability in drift rate (sv), starting point (sz), and non-decision time (st)—these parameters aren't not estimated by `fit_ddm`.
 
 To use/download ```fit_ddm```, run this line of code: ```source("https://raw.githubusercontent.com/hauselin/Rcode/master/fit_ddm.R")```. The first time you run this line of code, it will take some time because; subsequently, it should load the functions much faster.
 
@@ -181,18 +192,32 @@ Arguments in ```fit_ddm(data, rts, responses, id = NULL, group = NULL)```
 - **id** (default = NULL): specify in characters the name of your subject/id column (if not specified, assumes data [all rows] belong to a single subject)
 - **group** (default = NULL): specify in characters the name of your column(s) indicating various conditions
 - **startParams** (default = c(a = 2, v = 0.1, t0 = 0.3, z = 0.5)): starting parameters for likelihood estimation with `ucminf`
+- **simCheck** (default = TRUE): simulate data (n = 1000) with estimated parameters (using `rdiffusion`)
+- **decimal** (default = 4): round parameter estimates
 
-Output (data.table class)
+Output (tibble and data.table class)
 
 - subject: returns this variable only there's more than one subject
 - group/condition names: returns these variables only if you specify grouping variables
-- n: number of trials
+
+- n: total number of trials
+- n0: number of lower bound trials (response = 0 or 'lower')
+- n1: number of upper bound trials (response = 1 or 'upper')
+
 - a: boundary/threshold
 - v: drift rate/evidence accumulation rate
 - t0: non-decision time
 - z: starting-point bias (0.5 is no bias)
 - convergence: reason for optimization termination (see `?ucminf`)
 - value: objective function value at computed miminizer (see `?ucminf`)
+- response: proportion of upper bound (1) responses
+- responseSim: simulated proportion of upper bound responses (based on parameter estimates)
+- rtOverall: reaction time for upper and lower-bound trials
+- rtOverallSim: simulated reaction time for upper and lower trials
+- rt0: reaction time for lower-bound trials
+- rt0Sim: simulated reaction time for lower-bound trials
+- rt1: reaction time for upper-bound trials
+- rt1Sim: simulated reaction time for upper-bound trials
 
 ```R
 # load functions from my github site
@@ -216,3 +241,6 @@ fit_ddm(data = dataAll, rts = "rt", responses = "response", id = "subject", grou
 # fit model to each subject by cond1,cond2
 fit_ddm(data = dataAll, rts = "rt", responses = "response", id = "subject", group = c("cond1", "cond2"))
 ```
+## Fit full drift-diffusion model for two-choice response time tasks using maximum likelihood estimation (parameters: a, v, t0, z, st0, sz, sv)
+
+`fit_ddmfull` function fits seven-parameter (a, v, t0, z, st0, sz, sv) drift diffusion model to two-choice response time tasks using maximum likelihood estimation (R `ucminf` optimization). (st0: intertrial variability in non-decision time; sz: intertrial variability of starting point; sv: intertrial variability in drift rate) Works the same way as `fit_ezddm` and `fit_ddm` functions. Default starting parameters for maximum likelihood estimation are `startParams = c(a = 2, v = 0.1, t0 = 0.3, z = 0.5, st0 = 0.1, sz = 0.1, sv = 0.1)`. To use the function, run `source("https://raw.githubusercontent.com/hauselin/Rcode/master/fit_ddm.R")`.

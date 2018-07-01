@@ -5,7 +5,7 @@ if (length(toInstall)) install.packages(toInstall)
 rm(packages); rm(toInstall) 
 library(rtdists); library(ucminf); library(data.table); library(tidyverse); library(dtplyr)
 
-fit_ddm <- function(data, rts, responses, id = NULL, group = NULL, startParams = c(a = 2, v = 0.1, t0 = 0.3, z = 0.5), simCheck = TRUE, decimal = 4) {
+fit_ddmfull <- function(data, rts, responses, id = NULL, group = NULL, startParams = c(a = 2, v = 0.1, t0 = 0.3, z = 0.5, st0 = 0.1, sz = 0.1, sv = 0.1), simCheck = TRUE, decimal = 4) {
     
     setDT(data)
     
@@ -46,12 +46,15 @@ fit_ddm <- function(data, rts, responses, id = NULL, group = NULL, startParams =
     
     # define function to calculate likelihood of model parameters given observed data
     likelihood_ddm <- function(params, rt, response) {
-        if (params['t0'] < 0.05 | params['a'] <= 0 | params['z'] <= 0 | params['z'] > 1) return(1e6)
+        if (params['t0'] < 0.05 | params['a'] <= 0 | params['z'] <= 0 | params['z'] > 1 | params['st0'] < 0 | params['sz'] < 0 | params['sv'] < 0) return(1e6)
         densities <- ddiffusion(rt = rt, response = response, 
                                 a = params['a'], 
                                 v = params['v'], 
                                 t0 = params['t0'], 
-                                z = params['z'] * params['a']) + .Machine$double.eps
+                                z = params['z'] * params['a'],
+                                st0 = params['st0'],
+                                sz = params['sz'],
+                                sv = params['sv']) + .Machine$double.eps
         return(-2*sum(log(densities))) # return -2 * sum(log-likelihood)
     }
     
@@ -60,14 +63,14 @@ fit_ddm <- function(data, rts, responses, id = NULL, group = NULL, startParams =
     dataGroup1 <- data[response_num == 1, .(n1 = .N), by = c(id, group)]
     dataGroup <- left_join(dataGroup, dataGroup0, by = c(id, group)) %>% left_join(dataGroup1, by = c(id, group))
     
-    # startParams <- c(a = 2, v = 0.1, t0 = 0.3, z = 0.5)
+    # startParams = c(a = 2, v = 0.1, t0 = 0.3, z = 0.5, st0 = 0.1, sz = 0.1, sv = 0.1)
     # optimResults <- nlminb(startParams, likelihood_ddm, rt = data[, get(rts)], response = data[, get(responses)])
     # optimResults <- ucminf(startParams, likelihood_ddm, rt = data[, get(rts)], response = data[, get(responses)])
     # return(optimResults)
     # optimize for each subject, each condition/group
     # res <- data[, nlminb(startParams, likelihood_ddm, rt = get(rts), response = get(responses)), by = c(id, group)] # nlminb optimization
     res <- data[, ucminf(startParams, likelihood_ddm, rt = rtCol, response = response_char)[c('par', 'value', 'convergence')], by = c(id, group)] # ucminf optimization
-    res[, parName := c("a", "v", "t0", "z")]
+    res[, parName := c("a", "v", "t0", "z", "st0", "sz", "sv")]
     
     # convert long to wide form
     formulaString <- paste0(id)
@@ -84,7 +87,7 @@ fit_ddm <- function(data, rts, responses, id = NULL, group = NULL, startParams =
     resultsWide <- dcast(data = res, formula = form, value.var = c('par'))
     
     resultsWide2 <- left_join(dataGroup, resultsWide, by = c(id, group))
-    resultsFinal <- select(resultsWide2, id, group, n:n1, a, v, t0, z, everything())
+    resultsFinal <- select(resultsWide2, id, group, n:n1, a, v, t0, z, st0, sz, sv, everything())
     resultsFinal <- left_join(resultsFinal, behav, by = c(id, group))
     setDT(resultsFinal)
     # print(resultsFinal)
@@ -92,7 +95,8 @@ fit_ddm <- function(data, rts, responses, id = NULL, group = NULL, startParams =
     # simulate data
     if (simCheck) {
         resultsToSimulate <- copy(resultsFinal)
-        simulatedData <- resultsToSimulate[, rdiffusion(n = 1000, a = a, v = v, t0 = t0, z = z * a), by = c(id, group)]
+        simulatedData <- resultsToSimulate[, rdiffusion(n = 1000, a = a, v = v, t0 = t0, z = z * a, st0 = st0, sz = sz, sv = sv), 
+                                           by = c(id, group)]
         simulatedData[, response_num := as.numeric()]
         simulatedData[response == 'upper', response_num := 1]
         simulatedData[response == 'lower', response_num := 0]
@@ -109,6 +113,9 @@ fit_ddm <- function(data, rts, responses, id = NULL, group = NULL, startParams =
     resultsFinal[, v := round(v, decimal)]
     resultsFinal[, t0 := round(t0, decimal)]
     resultsFinal[, z := round(z, decimal)]
+    resultsFinal[, st0 := round(st0, decimal)]
+    resultsFinal[, sz := round(sz, decimal)]
+    resultsFinal[, sv := round(sv, decimal)]
     
     # remove temporary_subject variable
     if (id == "temporary_subject") {
@@ -119,7 +126,7 @@ fit_ddm <- function(data, rts, responses, id = NULL, group = NULL, startParams =
 }
 
 #### test function
-# library(data.table); library(rtdists); 
+# library(data.table); library(rtdists);
 # data1 <- rdiffusion(n = 300, a = 2, v = 0.3, t0 = 0.5, z = 0.3 * 2) # simulate data
 # data2 <- rdiffusion(n = 300, a = 2, v = -0.3, t0 = 0.5, z = 0.3 * 2) # simulate data
 # setDT(data1) # convert to data.table
@@ -129,7 +136,10 @@ fit_ddm <- function(data, rts, responses, id = NULL, group = NULL, startParams =
 # dataAll <- rbind(data1, data2)
 # dataAll[, cond1 := sample(c("a", "b"), 600, replace = T)] # randomly assign conditions a/b
 # dataAll[, cond2 := sample(c("c", "d"), 600, replace = T)] # randomly assign conditions c/d
-# fit_ddm(data = dataAll, rts = "rt", responses = "response", id = "subject") # fit model to each subject (no conditions)
-# fit_ddm(data = dataAll, rts = "rt", responses = "response", id = "subject", group = "cond1") # fit model to each subject by cond1
-# fit_ddm(data = dataAll, rts = "rt", responses = "response", id = "subject", group = c("cond1", "cond2")) # fit model to each subject by cond1,cond2
-# fit_ddm(data = dataAll, rts = "rt", responses = "response") # fit model to just entire data set (1 subject, 1 condition) 
+# fit_ddmfull(data = dataAll[subject == 1], rts = "rt", responses = "response", id = "subject") # fit model to each subject 1
+# fit_ddmfull(data = dataAll[subject == 2], rts = "rt", responses = "response", id = "subject") # fit model to each subject 2
+# fit_ddmfull(data = dataAll, rts = "rt", responses = "response", id = "subject") # fit model to each subject (no conditions)
+# # fit_ddm(data = dataAll, rts = "rt", responses = "response", id = "subject") # fit model to each subject (no conditions)
+# fit_ddmfull(data = dataAll, rts = "rt", responses = "response", id = "subject", group = "cond1") # fit model to each subject by cond1
+# fit_ddmfull(data = dataAll, rts = "rt", responses = "response", id = "subject", group = c("cond1", "cond2")) # fit model to each subject by cond1,cond2
+# fit_ddmfull(data = dataAll, rts = "rt", responses = "response") # fit model to just entire data set (1 subject, 1 condition)

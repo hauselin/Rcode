@@ -1,49 +1,68 @@
 # fit_ezddm function fits Wagenmaker et al.'s (2007) EZ-diffusion model for two-choice response time tasks. To use the function, ensure your dataframe is in long form, has single-trial reaction time (in seconds) and responses (coded as 0 or 1) on each row. You can use the function to fit the EZ-diffusion model to just a single subject or multiple subjects, and separately for each experimental condition (see below for examples).
 
 # install really useful packages
-packages <- c("tidyverse", "data.table")
+packages <- c("tidyverse", "data.table", "dtplyr", "rtdists")
 toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
 if (length(toInstall)) install.packages(toInstall)
 rm(packages); rm(toInstall)
-library(tidyverse); library(data.table)
+library(tidyverse); library(data.table); library(dtplyr); library(rtdists)
 
-fit_ezddm <- function(data, rts, responses, id = NULL, group = NULL) {
+fit_ezddm <- function(data, rts, responses, id = NULL, group = NULL, simCheck = TRUE, decimal = 4) {
     
     # message("Fits EZ-diffusion model (Wagenmaker et al., 2007, Psychonomic Bulletin & Review).\nResponses or choice must be coded as 0 (lower bound) or 1 (upper bound).")
     
-    setDT(data) # convert to data table
+    setDT(data)
     
-    if (data[, mean(get(rts), na.rm = T)] > 10) {
+    # create new variables
+    data$rtCol <- data[, get(rts)]
+    data$responseCol <- data[, get(responses)]
+    
+    if (data[, mean(rtCol, na.rm = T)] > 10) {
         message("Check if reaction time is in seconds, not milliseconds!")
-    }
-    
-    if (class(data[1, get(responses)]) %in% c('character', 'factor')) {
-        stop("Check if responses are coded as 0 (lower) and 1 (upper)!")
     }
     
     # if no id variable provided, assume it's just one subject's data
     if (is.null(id)) {
         id <- "temporary_subject"
-        data[, (id) := 1] 
+        data[, temporary_subject := 1] 
     }
     
+    # remove rts or responses rows
+    data <- data[!is.na(rtCol), ]
+    data <- data[!is.na(responseCol), ]
+    
+    # if response coded as 0 or 1, recode as 'lower' and 'upper'
+    if (data[, unique(responseCol)][1] %in% c(0, 1)) {
+        data[, response_num := responseCol]
+        data[, response_char := ifelse(response_num == 1, 'upper', 'lower')]
+    } else if (data[, unique(responseCol)][1] %in% c('upper', 'lower')) {
+        data[, response_char := responseCol]
+        data[, response_num := ifelse(response_char == "upper", 1, 0)]
+    }
+    
+    # compute rt and responses
+    behavOverall <- data[, .(response = round(mean(response_num, na.rm = T), 3), rtOverall = round(mean(rtCol, na.rm = T), 3)), by = c(id, group)]
+    behav0 <- data[response_num == 0, .(rt0 = round(mean(rtCol, na.rm = T), 3)), by = c(id, group)]
+    behav1 <- data[response_num == 1, .(rt1 = round(mean(rtCol, na.rm = T), 3)), by = c(id, group)]
+    behav <- left_join(behavOverall, behav0, by = c(id, group)) %>% left_join(behav1, by = c(id, group))
+    
     # get grouping variables
-    dataGroup <- data[, .(trials = .N), by = c(id, group)]
-    dataGroup[, trials := NULL]
+    dataGroup <- data[, .(n = .N), by = c(id, group)]
+    dataGroup0 <- data[response_num == 0, .(n0 = .N), by = c(id, group)]
+    dataGroup1 <- data[response_num == 1, .(n1 = .N), by = c(id, group)]
+    dataGroup <- left_join(dataGroup, dataGroup0, by = c(id, group)) %>% left_join(dataGroup1, by = c(id, group))
     
     # for accurate responses (coded as 1), calculate mean RT and RT variance for each subject, each condition
-    ddmRt <- data[get(responses) == 1, 
-                  .(rt = mean(get(rts), na.rm = T), rtVar = var(get(rts), na.rm = T)),
-                  by = c(id, group)]
+    ddmRt <- data[responseCol == 1, .(rt = mean(rtCol, na.rm = T), rtVar = var(rtCol, na.rm = T)), by = c(id, group)]
     
     # calculate responses for each subject, each condition
-    ddmAcc <- data[, .(acc = mean(get(responses), na.rm = T), n = .N), by = c(id, group)]
+    ddmAcc <- data[, .(acc = mean(responseCol, na.rm = T), n = .N), by = c(id, group)] %>% tbl_dt()
     
     if (sum(ddmAcc[, acc] %in% c(0.5, 1)) > 0) {
         n_corrected <- sum(ddmAcc[, acc] %in% c(0.5, 1))
         message(paste0("Mean accuracies (n = ", n_corrected, ") that are 0.5, or 1 have been adjusted slightly for model fitting."))
-        ddmAcc[, acc_adjust := 0]
-        ddmAcc[acc %in% c(0.5, 1), acc_adjust := 1]
+        ddmAcc[, accAdjust := 0]
+        ddmAcc[acc %in% c(0.5, 1), accAdjust := 1]
     }
     
     # if acc is 1, apply edge correction
@@ -57,24 +76,42 @@ fit_ezddm <- function(data, rts, responses, id = NULL, group = NULL) {
     # fit ez ddm model to each subject, each condition
     ddmResults <- dataForDDM[, ezddm(propCorrect = acc, rtCorrectVariance_seconds = rtVar, rtCorrectMean_seconds = rt), by = c(id, group)]
     
-    ddmResults <- left_join(dataGroup, ddmResults, by = c(id, group)) %>% 
+    resultsFinal <- left_join(dataGroup, ddmResults, by = c(id, group)) %>% 
         left_join(ddmRt, by = c(id, group)) %>%
-        left_join(ddmAcc, by = c(id, group))
+        left_join(ddmAcc, by = c(id, group, n)) %>% 
+        left_join(behav, by = c(id, group)) %>% 
+        select(-rt, -acc) 
     
-    ddmResults <- select(ddmResults, id, group, n, everything()) # reorder columns
-    # remove temporary_subject variable
-    if (id == 'temporary_subject') {
-        ddmResults$temporary_subject <- NULL
+    setDT(resultsFinal) # ensure it's data table format
+    setnames(resultsFinal, c("Ter", "rtVar"), c("t0_Ter", "rt1Var"))
+    
+    # simulate data
+    if (simCheck) {
+        resultsToSimulate <- copy(resultsFinal)
+        simulatedData <- resultsToSimulate[a > 0 & t0_Ter > 0, rdiffusion(n = 1000, a = a * 10, v = v * 10, t0 = t0_Ter, z = 0.5 * a * 10), by = c(id, group)]
+        simulatedData[, response_num := as.numeric()]
+        simulatedData[response == 'upper', response_num := 1]
+        simulatedData[response == 'lower', response_num := 0]
+        simulateBehavOverall <- simulatedData[, .(responseSim = round(mean(response_num, na.rm = T), 3), rtOverallSim = round(mean(rt, na.rm = T), 3)), by = c(id, group)]
+        simulateBehav0 <- simulatedData[response_num == 0, .(rt0Sim = round(mean(rt, na.rm = T), 3)), by = c(id, group)]
+        simulateBehav1 <- simulatedData[response_num == 1, .(rt1Sim = round(mean(rt, na.rm = T), 3)), by = c(id, group)]
+        simulateBehav <- left_join(simulateBehavOverall, simulateBehav0, by = c(id, group)) %>% left_join(simulateBehav1, by = c(id, group))
+        resultsFinal <- left_join(resultsFinal, simulateBehav, by = c(id, group))
+        resultsFinal <- select(resultsFinal, 1, group, n:rt1Var, response, responseSim, rtOverall, rtOverallSim, rt0, rt0Sim, rt1, rt1Sim)
     }
-    setDT(ddmResults) # ensure it's data table format
-    setnames(ddmResults, c("a", "v", "Ter", "rt", "rtVar"), c("a_threshold", "v_drift", "ndt_Ter", "rt_correct", "rtVar_correct"))
     
     # round results
-    ddmResults[, rt_correct := round(rt_correct, 3)]
-    ddmResults[, rtVar_correct := round(rtVar_correct, 3)]
-    ddmResults[, acc := round(acc, 3)]
+    resultsFinal[, a := round(a, decimal)]
+    resultsFinal[, v := round(v, decimal)]
+    resultsFinal[, t0_Ter := round(t0_Ter, decimal)]
+    resultsFinal[, rt1Var := round(rt1Var, 3)]
     
-    return(ddmResults[])
+    # remove temporary_subject variable
+    if (id == 'temporary_subject') {
+        resultsFinal$temporary_subject <- NULL
+    }
+    
+    return(tbl_dt(resultsFinal))
 }
 
 ezddm <- function(propCorrect, rtCorrectVariance_seconds, rtCorrectMean_seconds, nTrials = NULL) {
@@ -122,7 +159,7 @@ ezddm <- function(propCorrect, rtCorrectVariance_seconds, rtCorrectMean_seconds,
 
     }
     
-    return(round(data.frame(a, v, Ter), 6))
+    return(data.frame(a, v, Ter))
 }
 
 edgeCorrect <- function(n) {
