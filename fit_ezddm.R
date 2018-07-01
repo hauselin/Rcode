@@ -17,26 +17,27 @@ fit_ezddm <- function(data, rts, responses, id = NULL, group = NULL, simCheck = 
     data$rtCol <- data[, get(rts)]
     data$responseCol <- data[, get(responses)]
     
-    if (data[, mean(rtCol, na.rm = T)] > 10) {
-        message("Check if reaction time is in seconds, not milliseconds!")
+    # check if rt is in seconds
+    if (mean(data$rtCol, na.rm = T) > 100) {
+        stop("Check if reaction time is in seconds, not milliseconds!")
     }
     
     # if no id variable provided, assume it's just one subject's data
     if (is.null(id)) {
         id <- "temporary_subject"
-        data[, temporary_subject := 1] 
+        data$temporary_subject <- 1
     }
     
     # remove rts or responses rows
     data <- data[!is.na(rtCol), ]
     data <- data[!is.na(responseCol), ]
     
-    # if response coded as 0 or 1, recode as 'lower' and 'upper'
+    # recode response accordingly (character and integer)
     if (data[, unique(responseCol)][1] %in% c(0, 1)) {
         data[, response_num := responseCol]
         data[, response_char := ifelse(response_num == 1, 'upper', 'lower')]
     } else if (data[, unique(responseCol)][1] %in% c('upper', 'lower')) {
-        data[, response_char := responseCol]
+        data[, response_char := as.character(responseCol)]
         data[, response_num := ifelse(response_char == "upper", 1, 0)]
     }
     
@@ -53,10 +54,10 @@ fit_ezddm <- function(data, rts, responses, id = NULL, group = NULL, simCheck = 
     dataGroup <- left_join(dataGroup, dataGroup0, by = c(id, group)) %>% left_join(dataGroup1, by = c(id, group))
     
     # for accurate responses (coded as 1), calculate mean RT and RT variance for each subject, each condition
-    ddmRt <- data[responseCol == 1, .(rt = mean(rtCol, na.rm = T), rtVar = var(rtCol, na.rm = T)), by = c(id, group)]
+    ddmRt <- data[response_num == 1, .(rt = mean(rtCol, na.rm = T), rtVar = var(rtCol, na.rm = T)), by = c(id, group)]
     
     # calculate responses for each subject, each condition
-    ddmAcc <- data[, .(acc = mean(responseCol, na.rm = T), n = .N), by = c(id, group)] %>% tbl_dt()
+    ddmAcc <- data[, .(acc = mean(response_num, na.rm = T), n = .N), by = c(id, group)] %>% tbl_dt()
     
     if (sum(ddmAcc[, acc] %in% c(0.5, 1)) > 0) {
         n_corrected <- sum(ddmAcc[, acc] %in% c(0.5, 1))

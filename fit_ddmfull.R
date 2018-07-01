@@ -14,27 +14,26 @@ fit_ddmfull <- function(data, rts, responses, id = NULL, group = NULL, startPara
     data$responseCol <- data[, get(responses)]
     
     # check if rt is in seconds
-    if (data[, mean(rtCol, na.rm = T)] > 10) {
-        message("Check if reaction time is in seconds, not milliseconds!")
-    } 
+    if (mean(data$rtCol, na.rm = T) > 100) {
+        stop("Check if reaction time is in seconds, not milliseconds!")
+    }
     
     # if no id variable provided, assume it's just one subject's data
     if (is.null(id)) {
         id <- "temporary_subject"
-        data[, temporary_subject := 1] 
-        # message("id variable not provided. Assuming single-subject data.")
+        data$temporary_subject <- 1
     }
     
     # remove rts or responses rows
     data <- data[!is.na(rtCol), ]
     data <- data[!is.na(responseCol), ]
     
-    # if response coded as 0 or 1, recode as 'lower' and 'upper'
+    # recode response accordingly (character and integer)
     if (data[, unique(responseCol)][1] %in% c(0, 1)) {
         data[, response_num := responseCol]
         data[, response_char := ifelse(response_num == 1, 'upper', 'lower')]
     } else if (data[, unique(responseCol)][1] %in% c('upper', 'lower')) {
-        data[, response_char := responseCol]
+        data[, response_char := as.character(responseCol)]
         data[, response_num := ifelse(response_char == "upper", 1, 0)]
     }
     
