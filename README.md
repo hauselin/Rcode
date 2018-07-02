@@ -239,11 +239,9 @@ fit_ddm(data = dataAll, rts = "rt", responses = "response", id = "subject", grou
 # fit model to each subject by cond1,cond2
 fit_ddm(data = dataAll, rts = "rt", responses = "response", id = "subject", group = c("cond1", "cond2"))
 
-# multiple starting values
-startingValues <- data.frame(a = c(0.5, 1.5, 2.5), v = c(-2.5, 0, 2.5), t0 = c(0.3, 0.5, 0.7), z = c(0.3, 0.5, 0.7)) # or use expand.grid() to generate parameter combinations
+# create combinations of starting values
+startingValues <- expand.grid(a = seq(0.5, 4.5, by = 1.5), v = seq(-3, 3, by = 1.5), t0 = c(0.3, 0.6), z = c(0.4, 0.6))
 fit_ddm(data = dataAll, rts = "rt", responses = "response", id = "subject", group = c("cond1", "cond2"), startParams = startingValues)
-
-
 ```
 ## Fit full drift-diffusion model for two-choice response time tasks using maximum likelihood estimation (parameters: a, v, t0, z, st0, sz, sv)
 
