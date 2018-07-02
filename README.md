@@ -191,7 +191,7 @@ Arguments in ```fit_ddm(data, rts, responses, id = NULL, group = NULL)```
 - **responses** (required; coded as 0/1 or "lower"/"upper"): specify in characters the name of the accuracy column
 - **id** (default = NULL): specify in characters the name of your subject/id column (if not specified, assumes data [all rows] belong to a single subject)
 - **group** (default = NULL): specify in characters the name of your column(s) indicating various conditions
-- **startParams** (default = c(a = 2, v = 0.1, t0 = 0.3, z = 0.5)): starting parameters for likelihood estimation with `ucminf`
+- **startParams** (default = c(a = 2, v = 0.1, t0 = 0.3, z = 0.5)): starting parameters for likelihood estimation with `ucminf`; accepts named vector (see default values) or dataframe of starting values (see example below)
 - **simCheck** (default = TRUE): simulate data (n = 1000) with estimated parameters (using `rdiffusion`) to check model fit
 - **decimal** (default = 4): round parameter estimates
 
@@ -207,7 +207,7 @@ Output (tibble and data.table class)
 * t0: non-decision time
 * z: starting-point bias (0.5 is no bias)
 * convergence: reason for optimization termination (see ?ucminf)
-* value: objective function value at computed miminizer (see ?ucminf)
+* value: objective function value at computed miminizer (see ?ucminf); if multiple startParams provided, only returns result with smallest value
 * response: proportion of upper bound (1) responses
 * responseSim: simulated proportion of upper bound responses (based on parameter estimates)
 * rtOverall: reaction time for upper and lower-bound trials
@@ -238,6 +238,12 @@ fit_ddm(data = dataAll, rts = "rt", responses = "response", id = "subject")
 fit_ddm(data = dataAll, rts = "rt", responses = "response", id = "subject", group = "cond1") 
 # fit model to each subject by cond1,cond2
 fit_ddm(data = dataAll, rts = "rt", responses = "response", id = "subject", group = c("cond1", "cond2"))
+
+# multiple starting values
+startingValues <- data.frame(a = c(0.5, 1.5, 2.5), v = c(-2.5, 0, 2.5), t0 = c(0.3, 0.5, 0.7), z = c(0.3, 0.5, 0.7)) # or use expand.grid() to generate parameter combinations
+fit_ddm(data = dataAll, rts = "rt", responses = "response", id = "subject", group = c("cond1", "cond2"), startParams = startingValues)
+
+
 ```
 ## Fit full drift-diffusion model for two-choice response time tasks using maximum likelihood estimation (parameters: a, v, t0, z, st0, sz, sv)
 

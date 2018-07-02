@@ -6,3 +6,4 @@ source('/Users/Hause/Dropbox/Working Datasets/functionsR/cleanQuestionnairePsych
 source('/Users/Hause/Dropbox/Working Datasets/functionsR/summaryh.R')
 source('/Users/Hause/Dropbox/Working Datasets/functionsR/fit_ezddm.R')
 source('/Users/Hause/Dropbox/Working Datasets/functionsR/fit_ddm.R')
+source('/Users/Hause/Dropbox/Working Datasets/functionsR/fit_ddmfull.R')

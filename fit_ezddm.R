@@ -11,7 +11,7 @@ fit_ezddm <- function(data, rts, responses, id = NULL, group = NULL, simCheck = 
     
     # message("Fits EZ-diffusion model (Wagenmaker et al., 2007, Psychonomic Bulletin & Review).\nResponses or choice must be coded as 0 (lower bound) or 1 (upper bound).")
     
-    setDT(data)
+    data <- tbl_dt(data)
     
     # create new variables
     data$rtCol <- data[, get(rts)]

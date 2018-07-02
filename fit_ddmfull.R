@@ -7,7 +7,7 @@ library(rtdists); library(ucminf); library(data.table); library(tidyverse); libr
 
 fit_ddmfull <- function(data, rts, responses, id = NULL, group = NULL, startParams = c(a = 2, v = 0.1, t0 = 0.3, z = 0.5, st0 = 0.1, sz = 0.1, sv = 0.1), simCheck = TRUE, decimal = 4) {
     
-    setDT(data)
+    data <- tbl_dt(data)
     
     # create new variables
     data$rtCol <- data[, get(rts)]
@@ -68,7 +68,32 @@ fit_ddmfull <- function(data, rts, responses, id = NULL, group = NULL, startPara
     # return(optimResults)
     # optimize for each subject, each condition/group
     # res <- data[, nlminb(startParams, likelihood_ddm, rt = get(rts), response = get(responses)), by = c(id, group)] # nlminb optimization
-    res <- data[, ucminf(startParams, likelihood_ddm, rt = rtCol, response = response_char)[c('par', 'value', 'convergence')], by = c(id, group)] # ucminf optimization
+    if (any(class(startParams) %in% c("data.frame"))) {
+        message("Starting parameters for optimization:")
+        res <- data.frame()
+        for (startParamsI in 1:nrow(startParams)) {
+            startParametersTemp <- c(a = startParams$a[startParamsI], 
+                                     v = startParams$v[startParamsI], 
+                                     t0 = startParams$t0[startParamsI], 
+                                     z = startParams$z[startParamsI],
+                                     st0 = startParams$st0[startParamsI],
+                                     sz = startParams$sz[startParamsI],
+                                     sv = startParams$sv[startParamsI])
+            print(startParametersTemp)
+            resTemp <- data[, ucminf(startParametersTemp, likelihood_ddm, rt = rtCol, response = response_char)[c('par', 'value', 'convergence')], by = c(id, group)] # ucminf optimization
+            res <- bind_rows(res, resTemp)
+        }
+        setDT(res)
+        res <- distinct(res) # get rid of results/rows with exactly same results
+        colNamesOriginal <- names(res) # save column order
+        res <- left_join(res[, .(value = min(value)), by = c(id, group)], res, by = c(id, group, "value")) # find minimum values by group
+        setcolorder(res, names(colNamesOriginal)) # reorder columns to original order
+    } else {
+        message("Starting parameters for optimization:")
+        print(startParams)
+        res <- data[, ucminf(startParams, likelihood_ddm, rt = rtCol, response = response_char)[c('par', 'value', 'convergence')], by = c(id, group)] # ucminf optimization
+        setDT(res)
+    }
     res[, parName := c("a", "v", "t0", "z", "st0", "sz", "sv")]
     
     # convert long to wide form
