@@ -115,11 +115,11 @@ seWithin(data = ChickWeight, measurevar = "weight", betweenvars = "Diet", within
 
 Assumptions of EZ-diffusion model
 
-- error and correct reaction-time distributions are identical (often violated!)
-- z = .5: starting point is equidistant from the response boundaries
-- sv = 0: inter-trial variability in drift rate is negligible
-- sz = 0: inter-trial variability in starting point is negligible
-- st = 0: inter-trial range in nondecision time is negligible
+* error and correct reaction-time distributions are identical (often violated!)
+* z = .5: starting point is equidistant from the response boundaries
+* sv = 0: inter-trial variability in drift rate is negligible
+* sz = 0: inter-trial variability in starting point is negligible
+* st = 0: inter-trial range in nondecision time is negligible
 
 To use/download ```fit_ezddm```, run this line of code: ```source("https://raw.githubusercontent.com/hauselin/Rcode/master/fit_ezddm.R")```. The first time you run this line of code, it will take some time because; subsequently, it should load the functions much faster.
 
@@ -186,14 +186,15 @@ To use/download ```fit_ddm```, run this line of code: ```source("https://raw.git
 
 Arguments in ```fit_ddm(data, rts, responses, id = NULL, group = NULL)```
 
-- **data** (required): data object with reaction time and accuracy variables (long form data expected)
-- **rts** (required; in seconds): specify in characters the name of the reactiontime column
-- **responses** (required; coded as 0/1 or "lower"/"upper"): specify in characters the name of the accuracy column
-- **id** (default = NULL): specify in characters the name of your subject/id column (if not specified, assumes data [all rows] belong to a single subject)
-- **group** (default = NULL): specify in characters the name of your column(s) indicating various conditions
-- **startParams** (default = c(a = 2, v = 0.1, t0 = 0.3, z = 0.5)): starting parameters for likelihood estimation with `ucminf`; accepts named vector (see default values) or dataframe of starting values (see example below)
-- **simCheck** (default = TRUE): simulate data (n = 1000) with estimated parameters (using `rdiffusion`) to check model fit
-- **decimal** (default = 4): round parameter estimates
+* **data** (required): data object with reaction time and accuracy variables (long form data expected)
+* **rts** (required; in seconds): specify in characters the name of the reactiontime column
+* **responses** (required; coded as 0/1 or "lower"/"upper"): specify in characters the name of the accuracy column
+* **id** (default = NULL): specify in characters the name of your subject/id column (if not specified, assumes data [all rows] belong to a single subject)
+* **group** (default = NULL): specify in characters the name of your column(s) indicating various conditions
+* **startParams** (default = c(a = 2, v = 0.1, t0 = 0.3, z = 0.5)): starting parameters for likelihood estimation with `ucminf`; accepts named vector (see default values) or dataframe of starting values (see example below)
+* **simCheck** (default = TRUE): simulate data (n = 1000) with estimated parameters (using `rdiffusion`) to check model fit
+* **decimal** (default = 4): round parameter estimates
+* **parallel** (default = FALSE): use parallel processing (when multiple startParams have been provided)
 
 Output (tibble and data.table class)
 

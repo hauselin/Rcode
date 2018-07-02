@@ -1,11 +1,16 @@
 # install packages
-packages <- c("rtdists", "ucminf", "data.table", "tidyverse", "dtplyr")
+packages <- c("rtdists", "ucminf", "data.table", "tidyverse", "dtplyr", "doFuture")
 toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
 if (length(toInstall)) install.packages(toInstall)
 rm(packages); rm(toInstall) 
-library(rtdists); library(ucminf); library(data.table); library(tidyverse); library(dtplyr)
+library(rtdists); library(ucminf); library(data.table); library(tidyverse); library(dtplyr); library(doFuture)
 
-fit_ddmfull <- function(data, rts, responses, id = NULL, group = NULL, startParams = c(a = 2, v = 0.1, t0 = 0.3, z = 0.5, st0 = 0.1, sz = 0.1, sv = 0.1), simCheck = TRUE, decimal = 4) {
+fit_ddmfull <- function(data, rts, responses, id = NULL, group = NULL, startParams = c(a = 2, v = 0.1, t0 = 0.3, z = 0.5, st0 = 0.1, sz = 0.1, sv = 0.1), simCheck = TRUE, decimal = 4, parallel = FALSE) {
+    
+    if (parallel) {
+        registerDoFuture()
+        plan(multiprocess)
+    }
     
     data <- tbl_dt(data)
     
@@ -69,25 +74,44 @@ fit_ddmfull <- function(data, rts, responses, id = NULL, group = NULL, startPara
     # optimize for each subject, each condition/group
     # res <- data[, nlminb(startParams, likelihood_ddm, rt = get(rts), response = get(responses)), by = c(id, group)] # nlminb optimization
     if (any(class(startParams) %in% c("data.frame"))) {
-        message("Starting parameters for optimization:")
-        res <- data.frame()
-        for (startParamsI in 1:nrow(startParams)) {
-            startParametersTemp <- c(a = startParams$a[startParamsI], 
-                                     v = startParams$v[startParamsI], 
-                                     t0 = startParams$t0[startParamsI], 
-                                     z = startParams$z[startParamsI],
-                                     st0 = startParams$st0[startParamsI],
-                                     sz = startParams$sz[startParamsI],
-                                     sv = startParams$sv[startParamsI])
-            print(startParametersTemp)
-            resTemp <- data[, ucminf(startParametersTemp, likelihood_ddm, rt = rtCol, response = response_char)[c('par', 'value', 'convergence')], by = c(id, group)] # ucminf optimization
-            res <- bind_rows(res, resTemp)
+        
+        if (parallel) {
+            message("Running parallel loops for each combination of starting values...")
+            res <- foreach(startParamsI = 1:nrow(startParams)) %dopar% {
+                # startParametersTemp <- c(a = startParams$a[startParamsI], v = startParams$v[startParamsI], t0 = startParams$t0[startParamsI], z = startParams$z[startParamsI])
+                data[, ucminf(c(a = startParams$a[startParamsI],
+                                v = startParams$v[startParamsI],
+                                t0 = startParams$t0[startParamsI],
+                                z = startParams$z[startParamsI],
+                                st0 = startParams$st0[startParamsI],
+                                sz = startParams$sz[startParamsI],
+                                sv = startParams$sv[startParamsI]), likelihood_ddm, rt = rtCol, response = response_char)[c('par', 'value', 'convergence')], by = c(id, group)] # ucminf optimization
+            }
+            res <- rbindlist(res)
+            
+        } else {
+            message("Starting parameters for optimization:")
+            res <- data.frame()
+            for (startParamsI in 1:nrow(startParams)) {
+                startParametersTemp <- c(a = startParams$a[startParamsI],
+                                         v = startParams$v[startParamsI],
+                                         t0 = startParams$t0[startParamsI],
+                                         z = startParams$z[startParamsI],
+                                         st0 = startParams$st0[startParamsI],
+                                         sz = startParams$sz[startParamsI],
+                                         sv = startParams$sv[startParamsI])
+                print(startParametersTemp)
+                resTemp <- data[, ucminf(startParametersTemp, likelihood_ddm, rt = rtCol, response = response_char)[c('par', 'value', 'convergence')], by = c(id, group)] # ucminf optimization
+                res <- bind_rows(res, resTemp)
+            }
         }
+        
         setDT(res)
         res <- distinct(res) # get rid of results/rows with exactly same results
         colNamesOriginal <- names(res) # save column order
         res <- left_join(res[, .(value = min(value)), by = c(id, group)], res, by = c(id, group, "value")) # find minimum values by group
         setcolorder(res, names(colNamesOriginal)) # reorder columns to original order
+        
     } else {
         message("Starting parameters for optimization:")
         print(startParams)
