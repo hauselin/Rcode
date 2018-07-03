@@ -50,7 +50,7 @@ fit_ddmfull <- function(data, rts, responses, id = NULL, group = NULL, startPara
     
     # define function to calculate likelihood of model parameters given observed data
     likelihood_ddm <- function(params, rt, response) {
-        if (params['t0'] < 0.05 | params['a'] <= 0 | params['z'] <= 0 | params['z'] > 1 | params['st0'] < 0 | params['sz'] < 0 | params['sv'] < 0) return(1e6)
+        if (params['t0'] < 0.03 | params['a'] <= 0 | params['z'] <= 0 | params['z'] > 1 | params['st0'] < 0 | params['sz'] < 0 | params['sv'] < 0) return(1e6)
         densities <- ddiffusion(rt = rt, response = response, 
                                 a = params['a'], 
                                 v = params['v'], 
