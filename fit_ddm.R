@@ -9,7 +9,7 @@ fit_ddm <- function(data, rts, responses, id = NULL, group = NULL, startParams =
     
     if (parallel) {
         registerDoFuture()
-        plan(multiprocess)
+        plan(multiprocess, workers = availableCores() - 1)
     }
     
     data <- tbl_dt(data)
