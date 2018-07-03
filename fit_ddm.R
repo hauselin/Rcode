@@ -73,7 +73,7 @@ fit_ddm <- function(data, rts, responses, id = NULL, group = NULL, startParams =
     if (any(class(startParams) %in% c("data.frame"))) {
         
         if (parallel) {
-            message("Running parallel loops for each combination of starting values...")
+            message(paste0("Running parallel loops for ", nrow(startParams), " different starting values..."))
             res <- foreach(startParamsI = 1:nrow(startParams)) %dopar% {
                 # startParametersTemp <- c(a = startParams$a[startParamsI], v = startParams$v[startParamsI], t0 = startParams$t0[startParamsI], z = startParams$z[startParamsI])
                 data[, ucminf(c(a = startParams$a[startParamsI], v = startParams$v[startParamsI], t0 = startParams$t0[startParamsI], z = startParams$z[startParamsI]), likelihood_ddm, rt = rtCol, response = response_char)[c('par', 'value', 'convergence')], by = c(id, group)] # ucminf optimization
