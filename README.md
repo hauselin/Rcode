@@ -123,7 +123,7 @@ Assumptions of EZ-diffusion model
 
 To use/download ```fit_ezddm```, run this line of code: ```source("https://raw.githubusercontent.com/hauselin/Rcode/master/fit_ezddm.R")```. The first time you run this line of code, it will take some time because; subsequently, it should load the functions much faster.
 
-Arguments in ```fit_ezddm(data, rts, responses, id = NULL, group = NULL)```
+Arguments in ```fit_ezddm(data, rts, responses, id = NULL, group = NULL, simCheck = TRUE, decimal = 4)```
 
 * **data** (required): data object with reaction time and accuracy variables (long form data expected)
 * **rts** (required; in seconds): specify in characters the name of the reactiontime column
@@ -184,7 +184,7 @@ fit_ezddm(data = dataAll, rts = "rt", responses = "response", id = "subject", gr
 
 To use/download ```fit_ddm```, run this line of code: ```source("https://raw.githubusercontent.com/hauselin/Rcode/master/fit_ddm.R")```. The first time you run this line of code, it will take some time because; subsequently, it should load the functions much faster.
 
-Arguments in ```fit_ddm(data, rts, responses, id = NULL, group = NULL)```
+Arguments in ```fit_ddm(data, rts, responses, id = NULL, group = NULL, startParams = c(a = 2, v = 0.1, t0 = 0.3, z = 0.5), simCheck = TRUE, decimal = 4, parallel = FALSE)```
 
 * **data** (required): data object with reaction time and accuracy variables (long form data expected)
 * **rts** (required; in seconds): specify in characters the name of the reactiontime column
