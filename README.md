@@ -194,7 +194,7 @@ Arguments in ```fit_ddm(data, rts, responses, id = NULL, group = NULL)```
 * **startParams** (default = c(a = 2, v = 0.1, t0 = 0.3, z = 0.5)): starting parameters for likelihood estimation with `ucminf`; accepts named vector (see default values) or dataframe of starting values (see example below)
 * **simCheck** (default = TRUE): simulate data (n = 1000) with estimated parameters (using `rdiffusion`) to check model fit
 * **decimal** (default = 4): round parameter estimates
-* **parallel** (default = FALSE): use parallel processing (when multiple startParams have been provided)
+* **parallel** (default = FALSE): use parallel processing (when multiple startParams have been provided); uses all but 1 available cores
 
 Output (tibble and data.table class)
 
