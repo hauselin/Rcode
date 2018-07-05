@@ -127,7 +127,7 @@ Arguments in ```fit_ezddm(data, rts, responses, id = NULL, group = NULL, simChec
 
 * **data** (required): data object with reaction time and accuracy variables (long form data expected)
 * **rts** (required; in seconds): specify in characters the name of the reactiontime column
-* **responses** (required; coded as 0/1): specify in characters the name of the accuracy column
+* **responses** (required; coded as 0/1 or "lower"/"upper"): specify in characters the name of the accuracy column
 * **id** (default = NULL): specify in characters the name of your subject/id column (if not specified, assumes data [all rows] belong to a single subject)
 * **group** (default = NULL): specify in characters the name of your column(s) indicating various conditions
 * **simCheck** (default = TRUE): simulate data (n = 1000) with estimated parameters (using `rdiffusion`) to check model fit
@@ -180,7 +180,7 @@ fit_ezddm(data = dataAll, rts = "rt", responses = "response", id = "subject", gr
 
 ## Fit drift-diffusion model for two-choice response time tasks using maximum likelihood estimation (parameters: a, v, t0, z)
 
-`fit_ddm` function fits four-parameter (a, v, t0, z) drift diffusion model (also known as Wiener diffusion model) to two-choice response time tasks using maximum likelihood estimation (R `ucminf` optimization). Assumes no or negligible inter-trial variability in drift rate (sv), starting point (sz), and non-decision time (st)—these parameters aren't not estimated by `fit_ddm`.
+`fit_ddm` function fits four-parameter (a, v, t0, z) drift diffusion model (also known as Wiener diffusion model) to two-choice response time tasks using maximum likelihood estimation (R `ucminf` optimization). Assumes no or negligible inter-trial variability in drift rate (sv), starting point (sz), and non-decision time (st)—these parameters aren't estimated by `fit_ddm`.
 
 To use/download ```fit_ddm```, run this line of code: ```source("https://raw.githubusercontent.com/hauselin/Rcode/master/fit_ddm.R")```. The first time you run this line of code, it will take some time because; subsequently, it should load the functions much faster.
 
