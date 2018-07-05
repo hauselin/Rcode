@@ -111,7 +111,7 @@ seWithin(data = ChickWeight, measurevar = "weight", betweenvars = "Diet", within
 ```
 
 ## Fit EZ-diffusion model for two-choice response time tasks
-```fit_ezddm``` function fits [Wagenmaker et al.'s (2007)](https://link.springer.com/article/10.3758/BF03194023) EZ-diffusion model for two-choice response time tasks. To use the function, ensure your dataframe is in long form, has single-trial reaction time (in seconds) and accuracy (coded as 0 or 1) on each row. You can use the function to fit the EZ-diffusion model to just a single subject or multiple subjects, and separately for each experimental condition (see below for examples).
+```fit_ezddm``` function fits [Wagenmaker et al.'s (2007)](https://link.springer.com/article/10.3758/BF03194023) EZ-diffusion model for two-choice response time tasks. To use the function, ensure your dataframe is in long form, has single-trial reaction time (in seconds) and accuracy (coded as 0/1 or "lower"/"upper") on each row. You can use the function to fit the EZ-diffusion model to just a single subject or multiple subjects, and separately for each experimental condition (see below for examples).
 
 Assumptions of EZ-diffusion model
 
