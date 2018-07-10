@@ -9,12 +9,12 @@ cat("d: 0.20 (small), 0.50 (medium), .80 (large) (Cohen, 1992)\n")
 cat("r: .10 (small), .30 (medium), .50 (large) (Cohen, 1992)\n")
 cat("R2: .02 (small), .13 (medium), .26 (large) (Cohen, 1992)\n")
 
-summaryh <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable = FALSE) {
+summaryh <- function(model, decimal = 2, confInterval = NULL, showTable = FALSE, showEffectSizesTable = FALSE) {
     options(scipen = 999) # disable scientific notation
     if (class(model)[1] == 'lm') { 
-        reportLM(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable) #
+        reportLM(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable, confInterval = confInterval) #
     } else if (class(model)[1] %in% c("glm", "glmerMod")) { 
-        reportGLM(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable) #
+        reportGLM(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable, confInterval = confInterval) #
     }  else if (class(model)[1] %in% c("lmerMod")) { 
         message("Please install/load lmerTest package and then refit your model!")
     } else if (class(model)[1] %in% c("merModLmerTest", "lme", "lmerModLmerTest", "lmerTest")) { 
@@ -43,7 +43,7 @@ summaryh <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable
 
 
 
-reportLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable = FALSE) {
+reportLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable = FALSE, confInterval = NULL) {
     
     # ensure significant digits with sprintf
     digits <- paste0("%.", decimal, "f") # e.g, 0.10 not 0.1, 0.009, not 0.01
@@ -62,6 +62,20 @@ reportLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable
     colnames(estimates) <- c('estimate', 'std.error', 'df', 'statistic', 'p.value') # rename columns
     estimates <- data.frame(term = effectNames, estimates, stringsAsFactors = FALSE)
     rownames(estimates) <- NULL
+    
+    if (!is.null(confInterval)) {
+        confIntervalChar <- paste0(confInterval * 100, "%")
+        confIntervals <- confint(model, level = confInterval)
+        if (nrow(estimates) == 1) {
+            names(confIntervals) <- c('ciLower', 'ciUpper')
+            confIntervals <- data.frame(ciLower = confIntervals[1], ciUpper = confIntervals[2])
+        } else {
+            colnames(confIntervals) <- c('ciLower', 'ciUpper')
+            estimates <- cbind(estimates, confIntervals)
+        }
+        rownames(confIntervals) <- NULL
+        estimates <- cbind(estimates, confIntervals)
+    }
     
     # effect sizes
     estimates$es.r <-  sqrt((estimates$statistic ^ 2 / (estimates$statistic ^ 2 + estimates$df))) # r
@@ -88,12 +102,21 @@ reportLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable
     # leave df as integers
     estimatesRound$df <- round(estimates$df)
     
-    formattedOutput <- paste0("b = ", estimatesRound$estimate, 
-                              ", SE = ", estimatesRound$std.error, 
-                              ", t(", estimatesRound$df, ")", 
-                              " = ", estimatesRound$statistic,
-                              ", p ", estimatesRound$p.value, 
-                              ", r = ", estimatesRound$es.r)
+    if (!is.null(confInterval)) { # report CIs, not SE
+        formattedOutput <- paste0("b = ", estimatesRound$estimate,
+                                  ", ", confIntervalChar, " CI [", estimatesRound$ciLower, " ", estimatesRound$ciUpper, "]",
+                                  ", t(", estimatesRound$df, ")", 
+                                  " = ", estimatesRound$statistic,
+                                  ", p ", estimatesRound$p.value, 
+                                  ", r = ", estimatesRound$es.r)
+    } else { # report SE, not CIs
+        formattedOutput <- paste0("b = ", estimatesRound$estimate, 
+                                  ", SE = ", estimatesRound$std.error, 
+                                  ", t(", estimatesRound$df, ")", 
+                                  " = ", estimatesRound$statistic,
+                                  ", p ", estimatesRound$p.value, 
+                                  ", r = ", estimatesRound$es.r)
+    }
     
     # convert hyphens to minus (only possible on UNIX systems)
     if (.Platform$OS.type == 'unix') { # if linux/mac, ensure negative sign is minus, not hyphens
@@ -477,7 +500,7 @@ reportCortestPearson <- function(model, decimal = 2, showTable = FALSE, showEffe
 
 
 
-reportGLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable = FALSE) {
+reportGLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable = FALSE, confInterval = NULL) {
     
     # ensure significant digits with sprintf
     digits <- paste0("%.", decimal, "f") # e.g, 0.10 not 0.1, 0.009, not 0.01
@@ -495,6 +518,20 @@ reportGLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
     colnames(estimates) <- c('estimate', 'std.error', 'statistic', 'p.value', 'df') # rename columns
     estimates <- data.frame(term = effectNames, estimates)
     rownames(estimates) <- NULL
+    
+    if (!is.null(confInterval)) {
+        confIntervalChar <- paste0(confInterval * 100, "%")
+        confIntervals <- confint(model, level = confInterval)
+        if (nrow(estimates) == 1) {
+            names(confIntervals) <- c('ciLower', 'ciUpper')
+            confIntervals <- data.frame(ciLower = confIntervals[1], ciUpper = confIntervals[2])
+        } else {
+            colnames(confIntervals) <- c('ciLower', 'ciUpper')
+            estimates <- cbind(estimates, confIntervals)
+        }
+        rownames(confIntervals) <- NULL
+        estimates <- cbind(estimates, confIntervals)
+    }
     
     # effect sizes
     estimates$es.oddsratio <- exp(estimates$estimate)
@@ -518,12 +555,21 @@ reportGLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
     # leave df as integers
     estimatesRound$df <- round(estimates$df)
     
-    formattedOutput <- paste0("b = ", estimatesRound$estimate, 
-                              ", SE = ", estimatesRound$std.error, 
-                              ", z(", estimatesRound$df, ")", 
-                              " = ", estimatesRound$statistic,
-                              ", p ", estimatesRound$p.value, 
-                              ", r = ", estimatesRound$es.r)
+    if (!is.null(confInterval)) { # report CIs, not SE
+        formattedOutput <- paste0("b = ", estimatesRound$estimate, 
+                                  ", ", confIntervalChar, " CI [", estimatesRound$ciLower, " ", estimatesRound$ciUpper, "]",
+                                  ", z(", estimatesRound$df, ")", 
+                                  " = ", estimatesRound$statistic,
+                                  ", p ", estimatesRound$p.value, 
+                                  ", r = ", estimatesRound$es.r)
+    } else { # report SE, not CIs
+        formattedOutput <- paste0("b = ", estimatesRound$estimate, 
+                                  ", SE = ", estimatesRound$std.error, 
+                                  ", z(", estimatesRound$df, ")", 
+                                  " = ", estimatesRound$statistic,
+                                  ", p ", estimatesRound$p.value, 
+                                  ", r = ", estimatesRound$es.r)
+    }
     
     # convert hyphens to minus (only possible on UNIX systems)
     if (.Platform$OS.type == 'unix') { # if linux/mac, ensure negative sign is minus, not hyphens
