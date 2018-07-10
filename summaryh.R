@@ -69,9 +69,12 @@ reportLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable
         if (nrow(estimates) == 1) {
             names(confIntervals) <- c('ciLower', 'ciUpper')
             confIntervals <- data.frame(ciLower = confIntervals[1], ciUpper = confIntervals[2])
+            if (nrow(confIntervals) > 1) {
+                confIntervals <- confIntervals[rownames(confIntervals) %in% estimates$term, ]    
+            }
         } else {
             colnames(confIntervals) <- c('ciLower', 'ciUpper')
-            estimates <- cbind(estimates, confIntervals)
+            confIntervals <- confIntervals[rownames(confIntervals) %in% estimates$term, ]
         }
         rownames(confIntervals) <- NULL
         estimates <- cbind(estimates, confIntervals)
@@ -525,9 +528,12 @@ reportGLM <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTabl
         if (nrow(estimates) == 1) {
             names(confIntervals) <- c('ciLower', 'ciUpper')
             confIntervals <- data.frame(ciLower = confIntervals[1], ciUpper = confIntervals[2])
+            if (nrow(confIntervals) > 1) {
+                confIntervals <- confIntervals[rownames(confIntervals) %in% estimates$term, ]    
+            }
         } else {
             colnames(confIntervals) <- c('ciLower', 'ciUpper')
-            estimates <- cbind(estimates, confIntervals)
+            confIntervals <- confIntervals[rownames(confIntervals) %in% estimates$term, ]
         }
         rownames(confIntervals) <- NULL
         estimates <- cbind(estimates, confIntervals)
