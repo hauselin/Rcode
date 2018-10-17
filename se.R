@@ -153,16 +153,13 @@ seWithin <- function (data = NULL, measurevar, betweenvars = NULL, withinvars = 
     data <- data.frame(data) # convert to data.frame
     
     # Check if betweenvars and withinvars are factors
-    factorvars <- sapply(data[, c(betweenvars, withinvars), drop = FALSE], 
-                         FUN = is.factor)
+    factorvars <- sapply(data[, c(betweenvars, withinvars), drop = FALSE], FUN = is.factor)
     # Ensure that the betweenvars and withinvars are factors
     if (!all(factorvars)) {
         nonfactorvars <- names(factorvars)[!factorvars]
-        message("Automatically converting the following non-factors to factors: ", 
-                paste(nonfactorvars, collapse = ", "))
+        message("Automatically converting the following non-factors to factors: ", paste(nonfactorvars, collapse = ", "))
         data[nonfactorvars] <- lapply(data[nonfactorvars], factor)
     }
-    
     
     resultsList <- list() # empty list to store results
     
@@ -245,6 +242,7 @@ seWithin <- function (data = NULL, measurevar, betweenvars = NULL, withinvars = 
 }
 
 #### examples ####
+
 # seWithin(data = ChickWeight, measurevar = "weight", betweenvars = "Diet", withinvars = "Time", idvar = "Chick")
 # seWithin(data = ChickWeight, measurevar = "weight", betweenvars = "Diet", withinvars = "Time", idvar = "Chick", showNormed = TRUE)
 # library(ggplot2)
