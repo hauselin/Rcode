@@ -5,7 +5,7 @@ packages <- c("tidyverse", "data.table", "dtplyr", "rtdists")
 toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
 if (length(toInstall)) install.packages(toInstall)
 rm(packages); rm(toInstall)
-if ("package:plyr" %in% search()) detach("package:plyr", unload = TRUE) 
+if ("package:plyr" %in% search()) detach("package:plyr", unload = TRUE, force = T) 
 library(tidyverse); library(data.table); library(dtplyr); library(rtdists)
 
 fit_ezddm <- function(data, rts, responses, id = NULL, group = NULL, simCheck = TRUE, decimal = 4) {
