@@ -5,7 +5,7 @@
 packages <- c("tidyverse", "data.table", "dtplyr")
 toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
 if (length(toInstall)) install.packages(toInstall)
-if ("package:plyr" %in% search()) detach("package:plyr", unload = TRUE, force = T) 
+
 library(tidyverse); library(data.table); library(dtplyr)
 rm(packages); rm(toInstall)
 
@@ -107,7 +107,7 @@ cleanQuestionnairePsychopy <- function(data, subjectCol = 1, scaleName, scaleMin
         colnames(summaryLong) <- c(participantVariable, paste(scaleName, colnames(summaryLong)[-subjectCol], sep = '_')) # add _ to column name
         
         # convert to wide form
-        summaryWide <- reshape(select(summaryLong, 1:2, 6), timevar = colnames(summaryLong)[6], idvar = colnames(summaryLong)[1], direction = "wide", sep = '_')
+        summaryWide <- reshape(dplyr::select(summaryLong, 1:2, 6), timevar = colnames(summaryLong)[6], idvar = colnames(summaryLong)[1], direction = "wide", sep = '_')
         
         # store wide and long forms in list (this function returns this list as output)
         scaleM <- list(wide = summaryWide, long = summaryLong)
@@ -122,7 +122,7 @@ cleanQuestionnairePsychopy <- function(data, subjectCol = 1, scaleName, scaleMin
                                 by = .(pNo)]
         summaryLong$subscale <- 'overall'
         colnames(summaryLong) <- c(participantVariable, paste(scaleName, colnames(summaryLong)[-subjectCol], sep = '_'))
-        summaryWide <- reshape(select(summaryLong, 1:2, 6), timevar = colnames(summaryLong)[6], idvar = colnames(summaryLong)[1], direction = "wide", sep = '_')
+        summaryWide <- reshape(dplyr::select(summaryLong, 1:2, 6), timevar = colnames(summaryLong)[6], idvar = colnames(summaryLong)[1], direction = "wide", sep = '_')
         scaleM <- list(wide = summaryWide, long = summaryLong)
     }
     
@@ -148,7 +148,7 @@ cleanQuestionnairePsychopy <- function(data, subjectCol = 1, scaleName, scaleMin
                 subscaleName <- names(subscales)[subscaleIdx]
                 tempData <- data[subscale == subscaleName, c(participantVariable, 'item', 'scoreR'), with = FALSE] %>% # subset subscale items, select pNo, item, and scoreR columns
                     spread(item, scoreR) %>% # spread data to wide form
-                    select(-1) %>% # remove participant number column 
+                    dplyr::select(-1) %>% # remove participant number column 
                     as.data.frame() # psych::alpha function takes only dataframe
                 
                 reliability[[subscaleName]] <- psych::alpha(tempData, check.keys = TRUE) # store reliability results in list
@@ -158,7 +158,7 @@ cleanQuestionnairePsychopy <- function(data, subjectCol = 1, scaleName, scaleMin
         } else { # if no subscales
             tempData <- data[, c(participantVariable, 'item', 'scoreR'), with = FALSE] %>% 
                 spread(item, scoreR) %>% # spread data to wide form
-                select(-1) %>% # remove participant number column 
+                dplyr::select(-1) %>% # remove participant number column 
                 as.data.frame() # psych::alpha function takes only dataframe
             
             # uses scaleName variable as list item name

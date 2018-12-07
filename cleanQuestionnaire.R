@@ -23,7 +23,6 @@
 packages <- c("tidyverse", "data.table", "dtplyr")
 toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
 if (length(toInstall)) install.packages(toInstall)
-if ("package:plyr" %in% search()) detach("package:plyr", unload = TRUE, force = T) 
 library(tidyverse); library(data.table); library(dtplyr)
 rm(packages); rm(toInstall)
 
@@ -35,7 +34,7 @@ cleanQuestionnaire <- function(data, subjectCol = 1, scaleName, scaleMin = 1, sc
     data <- tbl_dt(data) # data.table
     participantVariable <- colnames(data)[subjectCol] # name of participant variable
     setnames(data, participantVariable, 'pNo')
-    dataWithoutPNo <- select(data, -subjectCol) # data without participant variable
+    dataWithoutPNo <- dplyr::select(data, -subjectCol) # data without participant variable
     dataWithoutPNo[, names(dataWithoutPNo) := lapply(.SD, as.character)] # in case it's factor, convert to character
     dataWithoutPNo[, names(dataWithoutPNo) := lapply(.SD, as.numeric)] # convert to numeric
     
@@ -45,7 +44,7 @@ cleanQuestionnaire <- function(data, subjectCol = 1, scaleName, scaleMin = 1, sc
     
     itemNamesToReverse <- c()
     if (length(itemsToReverse) > 0) { # if there are items to reverse
-        itemNamesToReverse <- colnames(select(dataWithoutPNo, itemsToReverse)) # variable (item) names that need to be reverse coded
+        itemNamesToReverse <- colnames(dplyr::select(dataWithoutPNo, itemsToReverse)) # variable (item) names that need to be reverse coded
     } 
     
     # dataframe that indicates which items to reverse and subscales (for verification before processing)
@@ -83,7 +82,7 @@ cleanQuestionnaire <- function(data, subjectCol = 1, scaleName, scaleMin = 1, sc
     #### reverse code items ####
     # ensure scores are numeric; create new scoreR variable to store reverse-coded items later on
     dataLong[, `:=` (score = as.numeric(score), scoreR = as.numeric(score))]
-    dataLong[item %in% itemNamesToReverse, scoreR := (scaleMax + 1 - score)] # reverse code selected items
+    dataLong[item %in% itemNamesToReverse, scoreR := (scaleMax + 1 - score)] # reverse code dplyr::selected items
     dataLong[, scaleName := scaleName]
     dataLong$subscale <- ''
     
@@ -120,7 +119,7 @@ cleanQuestionnaire <- function(data, subjectCol = 1, scaleName, scaleMin = 1, sc
         colnames(summaryLong) <- c(participantVariable, paste(scaleName, colnames(summaryLong)[-subjectCol], sep = '_')) # add _ to column name
         
         # convert to wide form
-        summaryWide <- reshape(select(summaryLong, 1:2, 6), timevar = colnames(summaryLong)[6], idvar = colnames(summaryLong)[1], direction = "wide", sep = '_')
+        summaryWide <- reshape(dplyr::select(summaryLong, 1:2, 6), timevar = colnames(summaryLong)[6], idvar = colnames(summaryLong)[1], direction = "wide", sep = '_')
         
         # store wide and long forms in list (this function returns this list as output)
         scaleM <- list(wide = summaryWide, long = summaryLong)
@@ -135,7 +134,7 @@ cleanQuestionnaire <- function(data, subjectCol = 1, scaleName, scaleMin = 1, sc
                                 by = .(pNo)]
         summaryLong$subscale <- 'overall'
         colnames(summaryLong) <- c(participantVariable, paste(scaleName, colnames(summaryLong)[-subjectCol], sep = '_'))
-        summaryWide <- reshape(select(summaryLong, 1:2, 6), timevar = colnames(summaryLong)[6], idvar = colnames(summaryLong)[1], direction = "wide", sep = '_')
+        summaryWide <- reshape(dplyr::select(summaryLong, 1:2, 6), timevar = colnames(summaryLong)[6], idvar = colnames(summaryLong)[1], direction = "wide", sep = '_')
         scaleM <- list(wide = summaryWide, long = summaryLong)
     }
     
@@ -159,9 +158,9 @@ cleanQuestionnaire <- function(data, subjectCol = 1, scaleName, scaleMin = 1, sc
             
             for (subscaleIdx in 1:length(subscales)) {
                 subscaleName <- names(subscales)[subscaleIdx]
-                tempData <- dataLong[subscale == subscaleName, c("pNo", 'item', 'scoreR'), with = FALSE] %>% # subset subscale items, select pNo, item, and scoreR columns
+                tempData <- dataLong[subscale == subscaleName, c("pNo", 'item', 'scoreR'), with = FALSE] %>% # subset subscale items, dplyr::select pNo, item, and scoreR columns
                     spread(item, scoreR) %>% # spread data to wide form
-                    select(-1) %>% # remove participant number column 
+                    dplyr::select(-1) %>% # remove participant number column 
                     as.data.frame() # psych::alpha function takes only dataframe
                 
                 reliability[[subscaleName]] <- psych::alpha(tempData, check.keys = TRUE) # store reliability results in list
@@ -169,9 +168,9 @@ cleanQuestionnaire <- function(data, subjectCol = 1, scaleName, scaleMin = 1, sc
             }
             
         } else { # if no subscales
-            tempData <- dataLong[, c("pNo", 'item', 'scoreR'), with = FALSE] %>% # select pNo, item, and scoreR columns
+            tempData <- dataLong[, c("pNo", 'item', 'scoreR'), with = FALSE] %>% # dplyr::select pNo, item, and scoreR columns
                 spread(item, scoreR) %>% # spread data to wide form
-                select(-1) %>% # remove participant number column 
+                dplyr::select(-1) %>% # remove participant number column 
                 as.data.frame() # psych::alpha function takes only dataframe
             
             # uses scaleName variable as list item name

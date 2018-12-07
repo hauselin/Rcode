@@ -5,7 +5,6 @@ packages <- c("tidyverse", "data.table", "dtplyr", "rtdists")
 toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
 if (length(toInstall)) install.packages(toInstall)
 rm(packages); rm(toInstall)
-if ("package:plyr" %in% search()) detach("package:plyr", unload = TRUE, force = T) 
 library(tidyverse); library(data.table); library(dtplyr); library(rtdists)
 
 fit_ezddm <- function(data, rts, responses, id = NULL, group = NULL, simCheck = TRUE, decimal = 4) {
@@ -82,7 +81,7 @@ fit_ezddm <- function(data, rts, responses, id = NULL, group = NULL, simCheck = 
         left_join(ddmRt, by = c(id, group)) %>%
         left_join(ddmAcc, by = c(id, group, n)) %>% 
         left_join(behav, by = c(id, group)) %>% 
-        select(-rt, -acc) 
+        dplyr::select(-rt, -acc) 
     
     setDT(resultsFinal) # ensure it's data table format
     setnames(resultsFinal, c("Ter", "rtVar"), c("t0_Ter", "rt1Var"))
@@ -99,7 +98,7 @@ fit_ezddm <- function(data, rts, responses, id = NULL, group = NULL, simCheck = 
         simulateBehav1 <- simulatedData[response_num == 1, .(rt1Sim = round(mean(rt, na.rm = T), 3)), by = c(id, group)]
         simulateBehav <- left_join(simulateBehavOverall, simulateBehav0, by = c(id, group)) %>% left_join(simulateBehav1, by = c(id, group))
         resultsFinal <- left_join(resultsFinal, simulateBehav, by = c(id, group))
-        resultsFinal <- select(resultsFinal, 1, group, n:rt1Var, response, responseSim, rtOverall, rtOverallSim, rt0, rt0Sim, rt1, rt1Sim)
+        resultsFinal <- dplyr::select(resultsFinal, 1, group, n:rt1Var, response, responseSim, rtOverall, rtOverallSim, rt0, rt0Sim, rt1, rt1Sim)
     }
     
     # round results

@@ -2,7 +2,6 @@
 packages <- c("rtdists", "ucminf", "data.table", "tidyverse", "dtplyr", "doFuture")
 toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
 if (length(toInstall)) install.packages(toInstall)
-if ("package:plyr" %in% search()) detach("package:plyr", unload = TRUE, force = T) 
 rm(packages); rm(toInstall) 
 library(rtdists); library(ucminf); library(data.table); library(tidyverse); library(dtplyr); library(doFuture)
 
@@ -121,7 +120,7 @@ fit_ddm <- function(data, rts, responses, id = NULL, group = NULL, startParams =
     resultsWide <- dcast(data = res, formula = form, value.var = c('par'))
     
     resultsWide2 <- left_join(dataGroup, resultsWide, by = c(id, group))
-    resultsFinal <- select(resultsWide2, id, group, n:n1, a, v, t0, z, everything())
+    resultsFinal <- dplyr::select(resultsWide2, id, group, n:n1, a, v, t0, z, everything())
     resultsFinal <- left_join(resultsFinal, behav, by = c(id, group))
     setDT(resultsFinal)
     # print(resultsFinal)
@@ -138,7 +137,7 @@ fit_ddm <- function(data, rts, responses, id = NULL, group = NULL, startParams =
         simulateBehav1 <- simulatedData[response_num == 1, .(rt1Sim = round(mean(rt, na.rm = T), 3)), by = c(id, group)]
         simulateBehav <- left_join(simulateBehavOverall, simulateBehav0, by = c(id, group)) %>% left_join(simulateBehav1, by = c(id, group))
         resultsFinal <- left_join(resultsFinal, simulateBehav, by = c(id, group))
-        resultsFinal <- select(resultsFinal, 1, group, n:value, response, responseSim, rtOverall, rtOverallSim, rt0, rt0Sim, rt1, rt1Sim)
+        resultsFinal <- dplyr::select(resultsFinal, 1, group, n:value, response, responseSim, rtOverall, rtOverallSim, rt0, rt0Sim, rt1, rt1Sim)
     }
     
     # round results

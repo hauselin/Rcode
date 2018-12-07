@@ -3,7 +3,6 @@ packages <- c("tidyverse", "data.table", "piecewiseSEM", "compute.es", "sjstats"
 toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
 if (length(toInstall)) install.packages(toInstall)
 rm(packages); rm(toInstall)
-if ("package:plyr" %in% search()) detach("package:plyr", unload = TRUE, force = T)
 library(tidyverse); library(data.table); library(piecewiseSEM); library(compute.es); library(sjstats)
 
 cat("d: 0.20 (small), 0.50 (medium), .80 (large) (Cohen, 1992)\n")
