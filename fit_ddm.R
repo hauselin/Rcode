@@ -2,6 +2,7 @@
 packages <- c("rtdists", "ucminf", "data.table", "tidyverse", "dtplyr", "doFuture")
 toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
 if (length(toInstall)) install.packages(toInstall)
+if ("package:plyr" %in% search()) detach("package:plyr", unload = TRUE) 
 rm(packages); rm(toInstall) 
 library(rtdists); library(ucminf); library(data.table); library(tidyverse); library(dtplyr); library(doFuture)
 

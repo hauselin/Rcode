@@ -23,6 +23,7 @@
 packages <- c("tidyverse", "data.table", "dtplyr")
 toInstall <- packages[!(packages %in% installed.packages()[,"Package"])]
 if (length(toInstall)) install.packages(toInstall)
+if ("package:plyr" %in% search()) detach("package:plyr", unload = TRUE) 
 library(tidyverse); library(data.table); library(dtplyr)
 rm(packages); rm(toInstall)
 
