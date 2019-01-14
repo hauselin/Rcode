@@ -11,11 +11,16 @@ cat("R2: .02 (small), .13 (medium), .26 (large) (Cohen, 1992)\n")
 
 summaryh <- function(model, decimal = 2, confInterval = NULL, showTable = FALSE, showEffectSizesTable = FALSE) {
     options(scipen = 999) # disable scientific notation
+    
     if (class(model)[1] == 'lm') { 
         reportLM(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable, confInterval = confInterval) #
     } else if (class(model)[1] %in% c("glm", "glmerMod")) { 
         reportGLM(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable, confInterval = confInterval) #
-    }  else if (class(model)[1] %in% c("lmerMod")) { 
+    } else if (sum(class(model) %in% c("rma"))) {
+        reportRMA(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable)
+    } else if (sum(class(model) %in% c("meta_fixed"))) {
+        reportMetaBayes(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable)
+    } else if (class(model)[1] %in% c("lmerMod")) { 
         message("Please install/load lmerTest package and then refit your model!")
     } else if (class(model)[1] %in% c("merModLmerTest", "lme", "lmerModLmerTest", "lmerTest")) { 
         reportMLM(model = model, decimal = decimal, showTable = showTable, showEffectSizesTable = showEffectSizesTable)
@@ -796,6 +801,172 @@ reportTtest <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTa
 }
 
 
+
+
+
+
+
+
+
+
+
+reportRMA <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable = FALSE, confInterval = NULL) {
+    
+    # ensure significant digits with sprintf
+    digits <- paste0("%.", decimal, "f") # e.g, 0.10 not 0.1, 0.009, not 0.01
+    if (decimal <= 2) {
+        pdigits <- paste0("%.", 3, "f")
+    } else {
+        pdigits <- paste0("%.", decimal, "f")
+    }
+    
+    # example output: g = 0.12 (95% CI = [0.01, 1.01])
+    estimates <- data.frame(estimate = as.numeric(model$b), 
+                            p.value = as.numeric(model$pval), 
+                            ciLower = as.numeric(model$ci.lb), 
+                            ciUpper = as.numeric(model$ci.ub)) # get estimates and put in dataframe
+    
+    # make a copy of estimates and convert to correct dp
+    estimatesCopy <- estimates
+    estimatesRound <- estimatesCopy
+    estimatesRound[abs(estimatesCopy) >= 0.01] <- round(estimatesRound[abs(estimatesCopy) >= 0.01], decimal)
+    estimatesRound[abs(estimatesCopy) >= 0.01] <- sprintf(digits, estimatesCopy[abs(estimatesCopy) >= 0.01])
+    estimatesRound[abs(estimatesCopy) < 0.01] <- signif(estimatesCopy[abs(estimatesCopy) < 0.01], digits = 1)
+    estimatesRound[abs(estimatesCopy) < 0.0000001] <- 0
+    # estimatesRound[abs(estimatesCopy) < 0.01] <- sprintf(pdigits, estimatesCopy[abs(estimatesCopy) < 0.01])
+    
+    # fix p values
+    estimatesRound$p.value <- round(estimates$p.value, decimal + 2)
+    estimatesRound$p.value <- ifelse(estimatesRound$p.value < .001, "< .001", paste0("= ", sprintf(pdigits, estimatesRound$p.value)))
+    estimatesRound$p.value <- gsub("= 0.", "= .", estimatesRound$p.value)
+    
+    formattedOutput <- paste0("g = ", estimatesRound$estimate,
+                              " (95% CI = [", estimatesRound$ciLower, ", ", estimatesRound$ciUpper, "])")
+    
+    if (estimates$p.value %between% c(0.01, 0.05)) {
+        stars <- "*  "
+    } else if (estimates$p.value %between% c(0.001, 0.01)) {
+        stars <- "**"
+    } else if (estimates$p.value < 0.001) {
+        stars <- "***"
+    } else {
+        stars <- "   "
+    }
+    
+    formattedOutput2 <- paste0(estimatesRound$estimate, ' ', stars, " [", estimatesRound$ciLower, ", ", estimatesRound$ciUpper, "]")
+    
+    # convert hyphens to minus (only possible on UNIX systems)
+    if (.Platform$OS.type == 'unix') { # if linux/mac, ensure negative sign is minus, not hyphens
+        formattedOutput <- gsub("-", replacement = "−", formattedOutput)
+    }
+    
+    formattedOutputDf <- data.table(results = as.character(formattedOutput), results2 = as.character(formattedOutput2))
+    
+    outputList <- list(results = formattedOutputDf)
+    
+    if (showTable) {
+        
+        # format table nicely
+        estimatesOutput <- data.frame(lapply(estimates, round, decimal + 1))
+        estimatesOutput <- data.table(estimatesOutput)
+        outputList$results2 <- estimatesOutput
+    }
+    
+    if (showEffectSizesTable) {
+        
+        outputList$effectSizes <- NULL
+        
+    }
+    
+    options(scipen = 0) # enable scientific notation
+    if (length(outputList) > 1) {
+        return(outputList)
+    } else {
+        return(formattedOutputDf)
+    }
+    
+}
+
+
+
+reportMetaBayes <- function(model, decimal = 2, showTable = FALSE, showEffectSizesTable = FALSE, confInterval = NULL) {
+    
+    # ensure significant digits with sprintf
+    digits <- paste0("%.", decimal, "f") # e.g, 0.10 not 0.1, 0.009, not 0.01
+    if (decimal <= 2) {
+        pdigits <- paste0("%.", 3, "f")
+    } else {
+        pdigits <- paste0("%.", decimal, "f")
+    }
+    
+    # example output: d = 0.12 (95% HPD = [0.01, 1.01])
+    estimatesTemp <- data.frame(model$estimates)
+    estimates <- data.frame(estimate = as.numeric(estimatesTemp$Mean), 
+                            ciLower = as.numeric(estimatesTemp$HPD95lower), 
+                            ciUpper = as.numeric(estimatesTemp$HPD95upper), 
+                            bf = model$BF) # get estimates and put in dataframe
+    
+    # make a copy of estimates and convert to correct dp
+    estimatesCopy <- estimates
+    estimatesRound <- estimatesCopy
+    estimatesRound[abs(estimatesCopy) >= 0.01] <- round(estimatesRound[abs(estimatesCopy) >= 0.01], decimal)
+    estimatesRound[abs(estimatesCopy) >= 0.01] <- sprintf(digits, estimatesCopy[abs(estimatesCopy) >= 0.01])
+    estimatesRound[abs(estimatesCopy) < 0.01] <- signif(estimatesCopy[abs(estimatesCopy) < 0.01], digits = 1)
+    estimatesRound[abs(estimatesCopy) < 0.0000001] <- 0
+    # estimatesRound[abs(estimatesCopy) < 0.01] <- sprintf(pdigits, estimatesCopy[abs(estimatesCopy) < 0.01])
+    
+    # fix p values
+    # estimatesRound$p.value <- round(estimates$p.value, decimal + 2)
+    # estimatesRound$p.value <- ifelse(estimatesRound$p.value < .001, "< .001", paste0("= ", sprintf(pdigits, estimatesRound$p.value)))
+    # estimatesRound$p.value <- gsub("= 0.", "= .", estimatesRound$p.value)
+    # 
+    formattedOutput <- paste0("d = ", estimatesRound$estimate,
+                              " (95% HPD = [", estimatesRound$ciLower, ", ", estimatesRound$ciUpper, "])")
+    
+    # if (estimates$p.value %between% c(0.01, 0.05)) {
+    #     stars <- "*  "
+    # } else if (estimates$p.value %between% c(0.001, 0.01)) {
+    #     stars <- "**"
+    # } else if (estimates$p.value < 0.001) {
+    #     stars <- "***"
+    # } else {
+    #     stars <- "   "
+    # }
+    # 
+    
+    formattedOutput2 <- paste0(estimatesRound$estimate, " [", estimatesRound$ciLower, ", ", estimatesRound$ciUpper, "]")
+    
+    # convert hyphens to minus (only possible on UNIX systems)
+    if (.Platform$OS.type == 'unix') { # if linux/mac, ensure negative sign is minus, not hyphens
+        formattedOutput <- gsub("-", replacement = "−", formattedOutput)
+    }
+    
+    formattedOutputDf <- data.table(results = as.character(formattedOutput), results2 = as.character(formattedOutput2))
+    
+    outputList <- list(results = formattedOutputDf)
+    
+    if (showTable) {
+        
+        # format table nicely
+        estimatesOutput <- data.frame(lapply(estimates, round, decimal + 1))
+        estimatesOutput <- data.table(estimatesOutput)
+        outputList$results2 <- estimatesOutput
+    }
+    
+    if (showEffectSizesTable) {
+        
+        outputList$effectSizes <- NULL
+        
+    }
+    
+    options(scipen = 0) # enable scientific notation
+    if (length(outputList) > 1) {
+        return(outputList)
+    } else {
+        return(formattedOutputDf)
+    }
+    
+}
 
 
 
