@@ -1,3 +1,5 @@
+# written by Hause Lin for Johnny Dubois
+
 warning("You now have a new function in your environnment called shorts_in_public(). Type shorts_in_public() to begin.")
 
 shorts_in_public <- function() {
