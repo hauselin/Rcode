@@ -1,4 +1,7 @@
+message("You now have a new function in your environnment called shorts_in_public(). Type shorts_in_public() to begin.")
+
 shorts_in_public <- function() {
+    
     question <- "Should I wear shorts in public? Designed and made for Johnny Dubois."
     message(question)
     cat("Respond yes (y) or no (n) to the following questions to figure out.")
