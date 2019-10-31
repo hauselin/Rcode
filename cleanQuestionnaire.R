@@ -48,7 +48,7 @@ cleanQuestionnaire <- function(data, subjectCol = 1, scaleName, scaleMin = 1, sc
     } 
     
     # dataframe that indicates which items to reverse and subscales (for verification before processing)
-    checkScaleItems <- tbl_dt(data_frame(scale = scaleName, itemName = colnames(dataWithoutPNo), item = as.numeric(1:ncol(dataWithoutPNo)), toReverse = 'no'))
+    checkScaleItems <- tbl_dt(tibble(scale = scaleName, itemName = colnames(dataWithoutPNo), item = as.numeric(1:ncol(dataWithoutPNo)), toReverse = 'no'))
     checkScaleItems[item %in% itemsToReverse, toReverse := 'yes']
     
     # add subscale name variable
