@@ -1,3 +1,4 @@
+# effect size converter
 es <- function(d = NULL, r = NULL, R2 = NULL, f = NULL, oddsratio = NULL, logoddsratio = NULL, auc = NULL, decimal = 3, msg = TRUE) {
     
     # Last modified by Hause Lin 13-03-18 18:53 hauselin@gmail.com
